@@ -1,0 +1,1 @@
+<livewire:queue.token-display />
