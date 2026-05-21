@@ -45,49 +45,37 @@ new class extends Component
 
 <div wire:poll.15s>
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div class="cc-page-header">
         <div>
-            <h2 class="h3 mb-0 fw-bold">Reception Queue</h2>
-            <span class="text-muted small"><span class="live-dot"></span> Real-time updates active</span>
+            <h1 class="cc-page-title"><i class="ti ti-layout-list text-primary me-2"></i>Reception Queue</h1>
+            <p class="cc-page-subtitle"><span class="live-dot"></span> Real-time OPD queue — no refresh needed</p>
         </div>
-        <a href="{{ route('reception.register') }}" class="btn btn-primary">
-            <i class="ti ti-user-plus me-1"></i> Quick Register
+        <a href="{{ route('reception.register') }}" class="btn btn-cc-primary btn-lg">
+            <i class="ti ti-user-plus me-1"></i> Register Patient
         </a>
     </div>
 
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
-            <div class="stat-gradient premium-card p-3 interactive">
-                <div class="small opacity-75">Today's OPD</div>
-                <div class="stat-value">{{ $todayCount }}</div>
-            </div>
+            <div class="stat-gradient p-3 interactive"><div class="small opacity-75">Today's OPD</div><div class="stat-value">{{ $todayCount }}</div></div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="stat-soft premium-card p-3 interactive">
-                <div class="text-muted small">Waiting</div>
-                <div class="fs-2 fw-bold text-primary">{{ $waiting->count() }}</div>
-            </div>
+            <div class="stat-soft"><div class="stat-label">Waiting</div><div class="stat-value">{{ $waiting->count() }}</div></div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="stat-soft premium-card p-3 interactive">
-                <div class="text-muted small">Emergency</div>
-                <div class="fs-2 fw-bold text-danger">{{ $emergencyCount }}</div>
-            </div>
+            <div class="stat-soft"><div class="stat-label">Emergency</div><div class="stat-value text-danger">{{ $emergencyCount }}</div></div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="stat-soft premium-card p-3 interactive">
-                <div class="text-muted small">Total Patients</div>
-                <div class="fs-2 fw-bold">{{ $totalPatients }}</div>
-            </div>
+            <div class="stat-soft"><div class="stat-label">All Patients</div><div class="stat-value">{{ $totalPatients }}</div></div>
         </div>
     </div>
 
-    <div class="premium-card">
-        <div class="card-header border-0 bg-transparent d-flex justify-content-between align-items-center py-3">
-            <h3 class="card-title mb-0"><i class="ti ti-list-numbers me-2"></i>Live Queue Board</h3>
-            <span class="badge bg-primary-lt">{{ $waiting->count() }} waiting</span>
+    <div class="cc-card premium-card">
+        <div class="cc-card-header">
+            <h3 class="h5 mb-0 fw-bold"><i class="ti ti-list-numbers me-2"></i>Live Queue Board</h3>
+            <span class="badge bg-primary-lt px-3 py-2">{{ $waiting->count() }} waiting</span>
         </div>
-        <div class="card-body pt-0">
+        <div class="cc-card-body pt-0">
             <div class="row g-3" wire:loading.class="opacity-50">
                 @forelse($waiting as $v)
                     <div class="col-md-6 col-xl-4" wire:key="visit-{{ $v->id }}">
@@ -120,9 +108,12 @@ new class extends Component
                         </div>
                     </div>
                 @empty
-                    <div class="col-12 text-center py-5 text-muted">
-                        <i class="ti ti-mood-empty" style="font-size:3rem;opacity:.3"></i>
-                        <p class="mt-2 mb-0">No patients in queue — register a new OPD patient</p>
+                    <div class="col-12">
+                        <div class="cc-empty">
+                            <i class="ti ti-mood-empty"></i>
+                            <p class="fw-semibold">Queue is empty</p>
+                            <p class="small">Register a new OPD patient to get started</p>
+                        </div>
                     </div>
                 @endforelse
             </div>

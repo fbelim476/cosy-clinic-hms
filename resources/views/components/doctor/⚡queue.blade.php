@@ -43,57 +43,106 @@ new class extends Component
             'consulting' => PatientVisit::with('patient')
                 ->where('status', VisitStatus::WithDoctor)->where('doctor_id', $doctorId)
                 ->whereDate('created_at', today())->get(),
+            'completedToday' => PatientVisit::where('doctor_id', $doctorId)
+                ->where('status', VisitStatus::AtPharmacy)
+                ->whereDate('created_at', today())->count(),
         ];
     }
 };
 ?>
 
-<div wire:poll.12s>
-    <div class="mb-4">
-        <h2 class="h3 fw-bold">Doctor Workspace</h2>
-        <span class="text-muted small"><span class="live-dot"></span> Queue syncs in real-time</span>
+<div wire:poll.12s class="doctor-workspace">
+    <div class="cc-page-header">
+        <div>
+            <h1 class="cc-page-title"><i class="ti ti-stethoscope text-primary me-2"></i>Doctor Workspace</h1>
+            <p class="cc-page-subtitle"><span class="live-dot"></span> Real-time consultation queue</p>
+        </div>
+    </div>
+
+    <div class="dw-stats-mini">
+        <div class="cc-stat-card">
+            <div class="cc-stat-label">Waiting</div>
+            <div class="cc-stat-value text-primary">{{ $waiting->count() }}</div>
+        </div>
+        <div class="cc-stat-card">
+            <div class="cc-stat-label">In Consult</div>
+            <div class="cc-stat-value text-warning">{{ $consulting->count() }}</div>
+        </div>
+        <div class="cc-stat-card">
+            <div class="cc-stat-label">To Pharmacy</div>
+            <div class="cc-stat-value text-success">{{ $completedToday }}</div>
+        </div>
     </div>
 
     <div class="row g-4">
         <div class="col-lg-5">
-            <div class="premium-card border-primary border-2">
-                <div class="card-header bg-primary-lt border-0">
-                    <h3 class="card-title text-primary mb-0">Waiting ({{ $waiting->count() }})</h3>
+            <div class="premium-card h-100">
+                <div class="card-header border-0 d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0"><i class="ti ti-users me-2"></i>Patient Queue</h3>
+                    <span class="badge bg-primary-lt">{{ $waiting->count() }}</span>
                 </div>
-                <div class="list-group list-group-flush" style="max-height:65vh;overflow-y:auto">
+                <div class="p-2" style="max-height:68vh;overflow-y:auto">
                     @forelse($waiting as $v)
-                        <div class="list-group-item token-card border-0 rounded-0 {{ $v->isEmergency() ? 'emergency' : '' }}" wire:key="w-{{ $v->id }}">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="token-hero" style="font-size:1.75rem">#{{ $v->token_number }}</span>
-                                    <div class="fw-bold">{{ $v->patient->name }}</div>
-                                    <div class="small text-muted">{{ Str::limit($v->chief_complaint, 50) }}</div>
+                        <div class="dw-queue-item {{ $v->isEmergency() ? 'border-danger' : '' }}" wire:key="w-{{ $v->id }}">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="queue-token" style="font-size:1.5rem">#{{ $v->token_number }}</span>
+                                        @if($v->isEmergency())<span class="badge bg-danger badge-emergency">ER</span>@endif
+                                    </div>
+                                    <div class="fw-bold mt-1">{{ $v->patient->name }}</div>
+                                    <div class="small text-muted">{{ $v->patient->age }}y · {{ ucfirst($v->patient->gender ?? '-') }}</div>
+                                    <div class="small mt-1 text-truncate">{{ $v->chief_complaint }}</div>
+                                    @if($v->bp || $v->spo2)
+                                        <div class="d-flex gap-2 mt-2 small">
+                                            @if($v->bp)<span class="badge bg-secondary-lt">BP {{ $v->bp }}</span>@endif
+                                            @if($v->spo2)<span class="badge bg-secondary-lt">SpO2 {{ $v->spo2 }}%</span>@endif
+                                        </div>
+                                    @endif
                                 </div>
-                                <button wire:click="startConsult({{ $v->id }})" class="btn btn-primary">
-                                    <i class="ti ti-player-play"></i>
+                                <button wire:click="startConsult({{ $v->id }})" class="btn btn-primary btn-sm flex-shrink-0" wire:loading.attr="disabled">
+                                    <i class="ti ti-player-play"></i> Start
                                 </button>
                             </div>
                         </div>
                     @empty
-                        <div class="p-4 text-center text-muted">No patients waiting</div>
+                        <x-ui.empty-state icon="ti-mood-smile" title="Queue empty" message="No patients waiting for consultation" />
                     @endforelse
                 </div>
             </div>
         </div>
+
         <div class="col-lg-7">
-            <div class="premium-card p-4">
-                <h4 class="mb-3"><i class="ti ti-stethoscope me-2"></i>Currently Consulting</h4>
-                @forelse($consulting as $v)
-                    <a href="{{ route('doctor.consult', $v) }}" class="btn btn-warning btn-lg w-100 mb-2">
-                        Continue — {{ $v->patient->name }} (Token #{{ $v->token_number }})
-                    </a>
-                @empty
-                    <p class="text-muted mb-0">Select a patient from the queue to begin</p>
-                @endforelse
+            <div class="premium-card mb-3">
+                <div class="card-header border-0">
+                    <h4 class="card-title mb-0"><i class="ti ti-stethoscope text-warning me-2"></i>Active Consultations</h4>
+                </div>
+                <div class="card-body pt-0">
+                    @forelse($consulting as $v)
+                        <a href="{{ route('doctor.consult', $v) }}" class="btn btn-warning btn-lg w-100 mb-2 d-flex justify-content-between align-items-center">
+                            <span><i class="ti ti-arrow-right me-2"></i>{{ $v->patient->name }}</span>
+                            <span class="badge bg-dark">#{{ $v->token_number }}</span>
+                        </a>
+                    @empty
+                        <div class="cc-empty py-4">
+                            <i class="ti ti-armchair"></i>
+                            <p class="mb-0">Select a patient from the queue to begin consultation</p>
+                        </div>
+                    @endforelse
+                </div>
             </div>
-            <div class="mt-3 small text-muted">
-                <kbd>F2</kbd> Focus search · <kbd>Ctrl+S</kbd> Save consultation (on consult screen)
+            <div class="premium-card p-4">
+                <h5 class="fw-bold mb-3"><i class="ti ti-bulb text-primary me-2"></i>Quick Tips</h5>
+                <ul class="small text-muted mb-0 ps-3">
+                    <li><kbd>Ctrl+S</kbd> Save consultation on consult screen</li>
+                    <li>Queue updates automatically via WebSocket</li>
+                    <li>Emergency patients appear at the top</li>
+                </ul>
             </div>
         </div>
     </div>
 </div>
+
+@script
+<script>$wire.on('notify', (p) => window.showToast?.(p.title, p.message, p.type));</script>
+@endscript

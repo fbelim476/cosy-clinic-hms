@@ -1,49 +1,43 @@
 @extends('layouts.app')
-@section('title', 'Patient History — '.$patient->name)
+@section('title', $patient->name)
+@section('breadcrumb')
+    <li><a href="{{ route('reception.patients') }}">Patients</a></li>
+    <li>{{ $patient->name }}</li>
+@endsection
 @section('content')
-<div class="page-header mb-4">
-    <h2 class="page-title">{{ $patient->name }} <small class="text-muted">{{ $patient->patient_id }}</small></h2>
-</div>
+<x-ui.page-header :title="$patient->name" :subtitle="$patient->patient_id . ' · ' . $patient->mobile" icon="ti-user">
+    <x-slot:actions>
+        <a href="{{ route('print.patient-card', $patient) }}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="ti ti-id"></i> Card</a>
+        <a href="{{ route('reception.register') }}" class="btn btn-cc-primary btn-sm"><i class="ti ti-plus"></i> New Visit</a>
+    </x-slot:actions>
+</x-ui.page-header>
+
 <div class="row g-4">
     <div class="col-lg-4">
-        <div class="glass-card card">
-            <div class="card-header"><h3 class="card-title">Profile</h3></div>
-            <div class="card-body">
-                <p><strong>Mobile:</strong> {{ $patient->mobile }}</p>
-                <p><strong>Age/Gender:</strong> {{ $patient->age }} / {{ ucfirst($patient->gender ?? '-') }}</p>
-                <p><strong>Blood Group:</strong> {{ $patient->blood_group ?? '-' }}</p>
-                <p><strong>Allergies:</strong> {{ $patient->allergies ?? 'None recorded' }}</p>
-                <p><strong>Diseases:</strong> {{ $patient->existing_diseases ?? '-' }}</p>
-            </div>
-        </div>
+        <x-ui.card title="Profile">
+            <dl class="row g-2 mb-0 small">
+                <dt class="col-5 text-muted">Blood Group</dt><dd class="col-7">{{ $patient->blood_group ?? '—' }}</dd>
+                <dt class="col-5 text-muted">Age / Gender</dt><dd class="col-7">{{ $patient->age }} / {{ ucfirst($patient->gender ?? '—') }}</dd>
+                <dt class="col-5 text-muted">Allergies</dt><dd class="col-7">{{ $patient->allergies ?? 'None' }}</dd>
+                <dt class="col-5 text-muted">Conditions</dt><dd class="col-7">{{ $patient->existing_diseases ?? '—' }}</dd>
+            </dl>
+        </x-ui.card>
     </div>
     <div class="col-lg-8">
-        <div class="glass-card card">
-            <div class="card-header"><h3 class="card-title">Visit Timeline</h3></div>
-            <div class="card-body">
-                <ul class="timeline">
-                    @foreach($patient->visits as $visit)
-                        <li class="mb-4 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between">
-                                <strong>{{ $visit->created_at->format('d M Y') }} — {{ $visit->visit_number }}</strong>
-                                <span class="badge {{ $visit->status->badgeClass() }}">{{ $visit->status->label() }}</span>
-                            </div>
-                            <p class="mb-1">{{ $visit->chief_complaint }}</p>
-                            @if($visit->consultation?->diagnosis)
-                                <p class="small"><strong>Diagnosis:</strong> {{ $visit->consultation->diagnosis }}</p>
-                            @endif
-                            @foreach($visit->prescriptions as $rx)
-                                <ul class="small mb-0">
-                                    @foreach($rx->items as $item)
-                                        <li>{{ $item->medicine_name }} — {{ $item->dosage }}</li>
-                                    @endforeach
-                                </ul>
-                            @endforeach
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
+        <x-ui.card title="Medical Timeline">
+            @foreach($patient->visits as $visit)
+                <div class="timeline-item">
+                    <div class="d-flex justify-content-between">
+                        <strong>{{ $visit->created_at->format('d M Y') }}</strong>
+                        <span class="badge {{ $visit->status->badgeClass() }}">{{ $visit->status->label() }}</span>
+                    </div>
+                    <p class="small mb-1 text-muted">{{ $visit->visit_number }} — {{ $visit->chief_complaint }}</p>
+                    @if($visit->consultation?->diagnosis)
+                        <p class="small mb-0"><strong>Diagnosis:</strong> {{ $visit->consultation->diagnosis }}</p>
+                    @endif
+                </div>
+            @endforeach
+        </x-ui.card>
     </div>
 </div>
 @endsection

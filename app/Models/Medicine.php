@@ -11,10 +11,21 @@ class Medicine extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'name', 'generic_name', 'sku', 'barcode', 'category',
-        'manufacturer', 'unit', 'mrp', 'selling_price', 'gst_percent',
-        'reorder_level', 'is_active',
+        'name', 'generic_name', 'sku', 'barcode', 'category', 'medicine_type',
+        'manufacturer', 'unit', 'strength', 'mrp', 'selling_price', 'purchase_price',
+        'gst_percent', 'reorder_level', 'description', 'is_active',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'selling_price' => 'decimal:2',
+            'purchase_price' => 'decimal:2',
+            'mrp' => 'decimal:2',
+            'gst_percent' => 'decimal:2',
+            'is_active' => 'boolean',
+        ];
+    }
 
     public function batches(): HasMany
     {

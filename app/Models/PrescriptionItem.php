@@ -10,7 +10,7 @@ class PrescriptionItem extends Model
     protected $fillable = [
         'prescription_id', 'medicine_id', 'medicine_name', 'dosage',
         'frequency', 'morning', 'afternoon', 'night', 'food_timing',
-        'days', 'quantity', 'notes',
+        'days', 'quantity', 'notes', 'unit_price', 'gst_percent', 'sku',
     ];
 
     protected function casts(): array
@@ -19,6 +19,8 @@ class PrescriptionItem extends Model
             'morning' => 'boolean',
             'afternoon' => 'boolean',
             'night' => 'boolean',
+            'unit_price' => 'decimal:2',
+            'gst_percent' => 'decimal:2',
         ];
     }
 

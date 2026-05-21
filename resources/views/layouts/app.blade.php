@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" x-data x-init="$store.theme.init()">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        (function(){var t=localStorage.getItem('cc-theme');if(t)document.documentElement.setAttribute('data-bs-theme',t);if(localStorage.getItem('cc-sidebar-collapsed')==='1')document.documentElement.classList.add('sidebar-collapsed-pending');})();
+    </script>
     <title>@yield('title', 'ClinicCare HMS') — Enterprise Medical ERP</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,10 +16,12 @@
     <link rel="stylesheet" href="{{ asset('css/premium.css') }}">
     @livewireStyles
     @stack('styles')
+    <style>html.sidebar-collapsed-pending body.cc-app{margin-left:0}</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
-<body class="cc-app" x-data="{ sidebarOpen: false }" @keydown.escape="sidebarOpen = false">
+<body class="cc-app" x-data x-init="$store.theme.init(); if(document.documentElement.classList.contains('sidebar-collapsed-pending')){document.body.classList.add('sidebar-collapsed');document.documentElement.classList.remove('sidebar-collapsed-pending');}">
 @auth
-    <div class="cc-sidebar-overlay" :class="{ 'show': sidebarOpen }" @click="sidebarOpen = false"></div>
+    <div class="cc-sidebar-overlay" @click="$store.sidebar.closeMobile()"></div>
     @include('layouts.partials.sidebar')
     <div class="cc-main">
         @include('layouts.partials.topbar')
@@ -49,20 +54,11 @@
         scheme: @json(config('broadcasting.connections.reverb.options.scheme', 'http')),
     };
 </script>
+<script src="{{ asset('js/cc-shell.js') }}"></script>
 <script src="{{ asset('js/hms-realtime.js') }}"></script>
 @livewireScripts
 @auth
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        window.initHmsRealtime?.({{ auth()->id() }});
-        const collapsed = localStorage.getItem('cc-sidebar-collapsed') === '1';
-        if (collapsed) document.body.classList.add('sidebar-collapsed');
-    });
-    function toggleSidebarCollapse() {
-        document.body.classList.toggle('sidebar-collapsed');
-        localStorage.setItem('cc-sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
-    }
-</script>
+<script>document.addEventListener('DOMContentLoaded',()=>window.initHmsRealtime?.({{ auth()->id() }}));</script>
 @endauth
 @stack('scripts')
 </body>

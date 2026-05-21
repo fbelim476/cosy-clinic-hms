@@ -1,19 +1,33 @@
 @extends('layouts.app')
-@section('title', 'Settings')
+@section('title', 'Hospital Settings')
+@section('breadcrumb')
+    <li><a href="{{ route('admin.dashboard') }}">Admin</a></li>
+    <li>Settings</li>
+@endsection
 @section('content')
-<div class="page-header mb-4"><h2 class="page-title">Hospital Settings</h2></div>
-<form method="POST" action="{{ route('admin.settings.update') }}">
-    @csrf
-    <div class="glass-card card">
-        <div class="card-body row g-3">
-            @foreach(['hospital_name'=>'Hospital Name','hospital_address'=>'Address','hospital_phone'=>'Phone','gst_number'=>'GST Number','prescription_header'=>'Prescription Header','invoice_footer'=>'Invoice Footer'] as $key => $label)
+<x-ui.page-header title="Hospital Settings" subtitle="Branding, print headers, and clinic configuration" icon="ti-settings" />
+
+<x-ui.card title="General Configuration">
+    <form method="POST" action="{{ route('admin.settings.update') }}">
+        @csrf
+        <div class="row g-3">
+            @foreach([
+                'hospital_name' => 'Hospital Name',
+                'hospital_address' => 'Address',
+                'hospital_phone' => 'Phone',
+                'gst_number' => 'GST Number',
+                'prescription_header' => 'Prescription Header',
+                'invoice_footer' => 'Invoice Footer',
+            ] as $key => $label)
                 <div class="col-md-6">
-                    <label class="form-label">{{ $label }}</label>
+                    <label class="cc-form-label">{{ $label }}</label>
                     <input type="text" name="{{ $key }}" value="{{ $settings[$key] ?? '' }}" class="form-control">
                 </div>
             @endforeach
         </div>
-        <div class="card-footer"><button class="btn btn-primary">Save Settings</button></div>
-    </div>
-</form>
+        <div class="cc-sticky-actions mt-4 rounded">
+            <button type="submit" class="btn btn-cc-primary"><i class="ti ti-device-floppy me-1"></i> Save Settings</button>
+        </div>
+    </form>
+</x-ui.card>
 @endsection

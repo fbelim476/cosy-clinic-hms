@@ -33,17 +33,6 @@ document.addEventListener('alpine:init', () => {
         },
     });
 
-    Alpine.store('theme', {
-        mode: localStorage.getItem('cc-theme') || 'light',
-        toggle() {
-            this.mode = this.mode === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-bs-theme', this.mode);
-            localStorage.setItem('cc-theme', this.mode);
-        },
-        init() {
-            document.documentElement.setAttribute('data-bs-theme', this.mode);
-        },
-    });
 });
 
 window.playNotificationSound = () => {

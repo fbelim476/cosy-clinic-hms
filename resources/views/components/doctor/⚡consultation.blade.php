@@ -31,6 +31,11 @@ new class extends Component
     public string $med_food = 'after';
     public int $med_days = 5;
     public int $med_qty = 1;
+    public ?int $selected_medicine_id = null;
+    public float $med_unit_price = 0;
+    public float $med_gst = 0;
+    public ?string $med_sku = null;
+    public int $med_stock = 0;
 
     public function mount(PatientVisit $visit): void
     {
@@ -46,11 +51,32 @@ new class extends Component
         }
     }
 
+    public function pickMedicine(int $medicineId): void
+    {
+        $m = Medicine::findOrFail($medicineId);
+        $snap = app(\App\Services\MedicineService::class)->snapshotFromMedicine($m, $m->name);
+        $this->selected_medicine_id = $m->id;
+        $this->med_name = $snap['medicine_name'];
+        $this->med_unit_price = $snap['unit_price'];
+        $this->med_gst = $snap['gst_percent'];
+        $this->med_sku = $snap['sku'];
+        $this->med_stock = $snap['stock'];
+        $this->medicineSearch = '';
+    }
+
     public function addMedicine(): void
     {
-        if (! $this->med_name) return;
-        $this->medicines[] = [
-            'medicine_name' => $this->med_name,
+        if (! $this->med_name) {
+            return;
+        }
+
+        $medicine = $this->selected_medicine_id
+            ? Medicine::find($this->selected_medicine_id)
+            : Medicine::where('is_active', true)->where('name', $this->med_name)->first();
+
+        $snap = app(\App\Services\MedicineService::class)->snapshotFromMedicine($medicine, $this->med_name);
+
+        $this->medicines[] = array_merge($snap, [
             'dosage' => $this->med_dosage,
             'frequency' => $this->med_frequency,
             'morning' => $this->med_morning,
@@ -59,8 +85,16 @@ new class extends Component
             'food_timing' => $this->med_food,
             'days' => $this->med_days,
             'quantity' => $this->med_qty,
-        ];
+        ]);
+
         $this->med_name = '';
+        $this->selected_medicine_id = null;
+        $this->med_unit_price = 0;
+        $this->med_gst = 0;
+        $this->med_sku = null;
+        $this->med_stock = 0;
+        $this->med_dosage = '';
+        $this->med_qty = 1;
     }
 
     public function removeMedicine(int $i): void
@@ -117,27 +151,40 @@ new class extends Component
 };
 ?>
 
-<div x-data @keydown.ctrl.s.prevent="$wire.save()">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+<div class="doctor-workspace" x-data @keydown.ctrl.s.prevent="$wire.save()">
+    <div class="cc-page-header mb-3">
         <div>
-            <h2 class="h3 fw-bold mb-0">{{ $visit->patient->name }}</h2>
-            <span class="badge bg-primary">Token #{{ $visit->token_number }}</span>
-            @if($visit->isEmergency())<span class="badge bg-danger ms-1">EMERGENCY</span>@endif
+            <h1 class="cc-page-title mb-1">{{ $visit->patient->name }}</h1>
+            <p class="cc-page-subtitle mb-0">
+                <span class="badge bg-primary">Token #{{ $visit->token_number }}</span>
+                <span class="badge bg-secondary-lt ms-1">{{ $visit->patient->patient_id }}</span>
+                @if($visit->isEmergency())<span class="badge bg-danger badge-emergency ms-1">EMERGENCY</span>@endif
+            </p>
         </div>
-        <a href="{{ route('doctor.dashboard') }}" class="btn btn-outline-secondary btn-sm"><i class="ti ti-arrow-left"></i> Queue</a>
+        <a href="{{ route('doctor.dashboard') }}" class="btn btn-outline-secondary"><i class="ti ti-arrow-left"></i> Back to Queue</a>
     </div>
 
     <div class="row g-4">
         <div class="col-lg-4">
-            <div class="premium-card consult-sidebar p-3">
-                <h5 class="fw-bold mb-3">Patient Profile</h5>
+            <div class="premium-card consult-sidebar p-3 sticky-top" style="top:calc(var(--cc-topbar-h) + 1rem)">
+                <h5 class="fw-bold mb-3"><i class="ti ti-user-circle me-1"></i>Patient Profile</h5>
+                <div class="dw-stats-mini mb-3">
+                    <div class="text-center p-2 rounded-3" style="background:var(--cc-primary-light)">
+                        <div class="small text-muted">BP</div>
+                        <div class="fw-bold">{{ $visit->bp ?? '—' }}</div>
+                    </div>
+                    <div class="text-center p-2 rounded-3" style="background:var(--cc-primary-light)">
+                        <div class="small text-muted">SpO2</div>
+                        <div class="fw-bold">{{ $visit->spo2 ?? '—' }}%</div>
+                    </div>
+                    <div class="text-center p-2 rounded-3" style="background:var(--cc-primary-light)">
+                        <div class="small text-muted">Sugar</div>
+                        <div class="fw-bold">{{ $visit->sugar_rbs ?? '—' }}</div>
+                    </div>
+                </div>
                 <div class="row g-2 small">
-                    <div class="col-6"><span class="text-muted">ID</span><br><strong>{{ $visit->patient->patient_id }}</strong></div>
                     <div class="col-6"><span class="text-muted">Mobile</span><br>{{ $visit->patient->mobile }}</div>
                     <div class="col-6"><span class="text-muted">Age/Sex</span><br>{{ $visit->patient->age }} / {{ ucfirst($visit->patient->gender ?? '-') }}</div>
-                    <div class="col-6"><span class="text-muted">BP</span><br>{{ $visit->bp ?? '—' }}</div>
-                    <div class="col-6"><span class="text-muted">SpO2</span><br>{{ $visit->spo2 ?? '—' }}%</div>
-                    <div class="col-6"><span class="text-muted">Sugar</span><br>{{ $visit->sugar_rbs ?? '—' }}</div>
                 </div>
                 <hr>
                 <p class="small mb-1"><strong>Complaint</strong></p>
@@ -153,7 +200,7 @@ new class extends Component
         </div>
 
         <div class="col-lg-8">
-            <ul class="nav nav-tabs mb-3">
+            <ul class="nav nav-tabs cc-tabs mb-3">
                 <li class="nav-item"><button type="button" class="nav-link {{ $activeTab==='clinical'?'active':'' }}" wire:click="$set('activeTab','clinical')">Clinical</button></li>
                 <li class="nav-item"><button type="button" class="nav-link {{ $activeTab==='rx'?'active':'' }}" wire:click="$set('activeTab','rx')">Prescription</button></li>
             </ul>
@@ -182,33 +229,48 @@ new class extends Component
                 @else
                 <div class="premium-card p-4">
                         <div class="row g-2 mb-3">
-                            <div class="col-md-4">
-                                <input type="text" wire:model.live.debounce.300ms="medicineSearch" class="form-control" placeholder="Search medicines...">
-                                <input wire:model="med_name" class="form-control mt-1" placeholder="Medicine name">
+                            <div class="col-md-5">
+                                <input type="text" wire:model.live.debounce.300ms="medicineSearch" class="form-control" placeholder="Search medicines by name, SKU...">
                                 @if($medicineSearch && $medicineList->count())
-                                    <div class="list-group mt-1 shadow-sm" style="max-height:120px;overflow:auto">
+                                    <div class="list-group mt-1 shadow-sm" style="max-height:160px;overflow:auto">
                                         @foreach($medicineList as $m)
-                                            <button type="button" class="list-group-item list-group-item-action py-1 small" wire:click="$set('med_name','{{ $m->name }}')">{{ $m->name }}</button>
+                                            <button type="button" class="list-group-item list-group-item-action py-2 small d-flex justify-content-between"
+                                                    wire:click="pickMedicine({{ $m->id }})">
+                                                <span><strong>{{ $m->name }}</strong><br><code>{{ $m->sku }}</code></span>
+                                                <span class="text-primary fw-bold">₹{{ $m->selling_price }} · {{ $m->gst_percent }}% GST</span>
+                                            </button>
                                         @endforeach
+                                    </div>
+                                @endif
+                                <input wire:model="med_name" class="form-control mt-2" placeholder="Medicine name">
+                                @if($selected_medicine_id)
+                                    <div class="small mt-2 p-2 rounded bg-success-lt">
+                                        <strong>₹{{ number_format($med_unit_price, 2) }}</strong> · GST {{ $med_gst }}%
+                                        · SKU {{ $med_sku ?? '—' }} · Stock {{ $med_stock }}
                                     </div>
                                 @endif
                             </div>
                             <div class="col-md-2"><input wire:model="med_dosage" class="form-control" placeholder="Dosage"></div>
-                            <div class="col-md-2"><input wire:model="med_frequency" class="form-control" placeholder="1-0-1"></div>
+                            <div class="col-md-1"><input type="number" wire:model="med_qty" min="1" class="form-control" placeholder="Qty"></div>
+                            <div class="col-md-1"><input type="number" wire:model="med_days" min="1" class="form-control" placeholder="Days"></div>
                             <div class="col-md-1"><label class="form-check"><input type="checkbox" wire:model="med_morning" class="form-check-input">M</label></div>
                             <div class="col-md-1"><label class="form-check"><input type="checkbox" wire:model="med_afternoon" class="form-check-input">A</label></div>
                             <div class="col-md-1"><label class="form-check"><input type="checkbox" wire:model="med_night" class="form-check-input">N</label></div>
-                            <div class="col-md-1"><button type="button" wire:click="addMedicine" class="btn btn-outline-primary w-100">+</button></div>
                         </div>
-                        <table class="table table-sm">
-                            <thead><tr><th>Medicine</th><th>Dosage</th><th>Schedule</th><th>Days</th><th></th></tr></thead>
+                        <div class="text-end mb-2">
+                            <button type="button" wire:click="addMedicine" class="btn btn-primary btn-sm"><i class="ti ti-plus"></i> Add Medicine</button>
+                        </div>
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light"><tr><th>Medicine</th><th>SKU</th><th>Price</th><th>GST</th><th>Qty</th><th>Schedule</th><th></th></tr></thead>
                             <tbody>
                                 @foreach($medicines as $i => $med)
                                     <tr>
-                                        <td>{{ $med['medicine_name'] }}</td>
-                                        <td>{{ $med['dosage'] }}</td>
+                                        <td class="fw-semibold">{{ $med['medicine_name'] }}</td>
+                                        <td><code class="small">{{ $med['sku'] ?? '—' }}</code></td>
+                                        <td>₹{{ number_format($med['unit_price'] ?? 0, 2) }}</td>
+                                        <td>{{ $med['gst_percent'] ?? 0 }}%</td>
+                                        <td>{{ $med['quantity'] }}</td>
                                         <td>{{ ($med['morning']?'M':'') . ($med['afternoon']?'A':'') . ($med['night']?'N':'') }}</td>
-                                        <td>{{ $med['days'] }}</td>
                                         <td><button type="button" wire:click="removeMedicine({{ $i }})" class="btn btn-sm btn-ghost-danger">×</button></td>
                                     </tr>
                                 @endforeach

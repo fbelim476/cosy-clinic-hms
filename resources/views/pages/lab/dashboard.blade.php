@@ -1,36 +1,51 @@
 @extends('layouts.app')
-@section('title', 'Lab Panel')
+@section('title', 'Laboratory')
+@section('breadcrumb')
+    <li><a href="{{ auth()->user()->dashboardRoute() }}">Home</a></li>
+    <li>Lab</li>
+@endsection
 @section('content')
-<div class="page-header mb-4">
-    <h2 class="page-title"><i class="ti ti-test-pipe text-primary me-2"></i>Lab Technician Panel</h2>
-</div>
+<x-ui.page-header title="Laboratory" subtitle="{{ $pending->count() }} pending tests today" icon="ti-test-pipe-2" :live="true" />
+
 <div class="row g-4">
     <div class="col-lg-6">
-        <div class="glass-card card">
-            <div class="card-header bg-warning-lt"><h3 class="card-title">Pending Tests ({{ $pending->count() }})</h3></div>
-            @foreach($pending as $order)
-                <div class="card-body border-bottom">
-                    <strong>{{ $order->patientVisit->patient->name }}</strong> — {{ $order->labTest->name }}
-                    <form method="POST" action="{{ route('lab.complete', $order) }}" enctype="multipart/form-data" class="mt-2">
+        <x-ui.card title="Pending Tests" subtitle="{{ $pending->count() }} awaiting results">
+            @forelse($pending as $order)
+                <div class="border-bottom pb-3 mb-3" style="border-color:var(--cc-glass-border)!important">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <strong>{{ $order->patientVisit->patient->name }}</strong>
+                            <div class="small text-muted">{{ $order->labTest->name }}</div>
+                        </div>
+                        <span class="badge bg-warning-lt">Pending</span>
+                    </div>
+                    <form method="POST" action="{{ route('lab.complete', $order) }}" enctype="multipart/form-data">
                         @csrf
-                        <textarea name="result_values" class="form-control mb-2" placeholder="Result values..." rows="2"></textarea>
-                        <input type="file" name="report" class="form-control mb-2" accept=".pdf,.jpg,.png">
-                        <button class="btn btn-sm btn-success">Mark Completed</button>
+                        <textarea name="result_values" class="form-control form-control-sm mb-2" rows="2" placeholder="Result values (e.g. Hb: 12.5)"></textarea>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <input type="file" name="report" class="form-control form-control-sm flex-grow-1" accept=".pdf,.jpg,.png">
+                            <button class="btn btn-sm btn-cc-primary">Complete</button>
+                        </div>
                     </form>
                 </div>
-            @endforeach
-            @if($pending->isEmpty())<div class="card-body text-muted">No pending tests</div>@endif
-        </div>
+            @empty
+                <x-ui.empty-state icon="ti-test-pipe-off" title="All caught up" message="No pending lab orders." />
+            @endforelse
+        </x-ui.card>
     </div>
     <div class="col-lg-6">
-        <div class="glass-card card">
-            <div class="card-header"><h3 class="card-title">Completed Today</h3></div>
-            <ul class="list-group list-group-flush">
+        <x-ui.card title="Completed Today">
+            <x-ui.table>
+                <x-slot:head><tr><th>Patient</th><th>Test</th><th>Time</th></tr></x-slot:head>
                 @foreach($completed as $order)
-                    <li class="list-group-item">{{ $order->patientVisit->patient->name }} — {{ $order->labTest->name }}</li>
+                    <tr>
+                        <td>{{ $order->patientVisit->patient->name }}</td>
+                        <td>{{ $order->labTest->name }}</td>
+                        <td class="text-muted small">{{ $order->completed_at?->format('h:i A') }}</td>
+                    </tr>
                 @endforeach
-            </ul>
-        </div>
+            </x-ui.table>
+        </x-ui.card>
     </div>
 </div>
 @endsection

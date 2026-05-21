@@ -33,6 +33,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users');
         Route::get('/medicines', [MedicineController::class, 'index'])->name('medicines');
         Route::post('/medicines', [MedicineController::class, 'store'])->name('medicines.store');
+        Route::get('/medicines/export', [MedicineController::class, 'export'])->name('medicines.export');
+        Route::get('/medicines/template', [MedicineController::class, 'template'])->name('medicines.template');
+        Route::post('/medicines/import', [MedicineController::class, 'import'])->name('medicines.import');
         Route::get('/settings', [SettingController::class, 'index'])->name('settings');
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
     });

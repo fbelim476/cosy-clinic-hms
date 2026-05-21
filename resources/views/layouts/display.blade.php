@@ -1,13 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="token-display-root">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Token Display — ClinicCare HMS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/premium.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/pusher-js@8.4.0/dist/web/pusher.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>OPD Token Display — ClinicCare HMS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+    {{-- Do NOT use @vite here — manifest may exist without token-display.css and throws ViteException --}}
+    <link rel="stylesheet" href="{{ asset('css/token-display.css') }}?v={{ file_exists(public_path('css/token-display.css')) ? filemtime(public_path('css/token-display.css')) : time() }}">
+
+    @livewireStyles
+
+    {{-- Inline fallback: guarantees styling even if css/token-display.css 404s --}}
+    @include('layouts.partials.token-display-critical-css')
+
     <script>
         window.__CC_REVERB__ = {
             key: @json(config('broadcasting.connections.reverb.key')),
@@ -16,30 +27,45 @@
             scheme: @json(config('broadcasting.connections.reverb.options.scheme', 'http')),
         };
     </script>
-    <script src="{{ asset('js/hms-realtime.js') }}"></script>
-    @livewireStyles
-    <style>
-        body { font-family: Inter, sans-serif; background: linear-gradient(160deg, #0c1929 0%, #0f2744 50%, #0a1628 100%); color: #fff; min-height: 100vh; margin: 0; padding: 2rem; }
-        .display-header { text-align: center; margin-bottom: 2rem; }
-        .display-header h1 { font-size: 2rem; background: linear-gradient(90deg, #38bdf8, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .display-label { font-size: 1.25rem; letter-spacing: 0.25em; opacity: 0.6; text-transform: uppercase; }
-        .display-token-hero { font-size: clamp(6rem, 18vw, 12rem); font-weight: 900; line-height: 1; background: linear-gradient(180deg, #fff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transition: all 0.4s ease; }
-        .display-patient-name { font-size: clamp(1.5rem, 4vw, 2.5rem); margin-top: 1rem; font-weight: 600; }
-        .next-token-box { background: rgba(255,255,255,0.08); border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(56,189,248,0.2); transition: transform 0.3s; }
-        .next-token-box.emergency { background: rgba(239,68,68,0.25); border-color: #ef4444; animation: emergencyPulse 1.5s infinite; }
-        .next-num { font-size: 2rem; font-weight: 800; color: #38bdf8; }
-        .next-name { font-size: 0.85rem; opacity: 0.8; margin-top: 0.25rem; }
-        @keyframes emergencyPulse { 50% { box-shadow: 0 0 30px rgba(239,68,68,0.5); } }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/pusher-js@8.4.0/dist/web/pusher.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
+    <script src="{{ url('js/hms-realtime.js') }}"></script>
 </head>
-<body>
-    <div class="display-header">
-        <h1>ClinicCare OPD</h1>
-        <div style="opacity:0.5">{{ now()->format('l, d F Y — h:i A') }}</div>
-        <span class="live-dot" style="margin-top:0.5rem"></span> <small>LIVE</small>
-    </div>
-    {{ $slot }}
+<body class="token-display-screen">
+    <header class="td-header">
+        <div>
+            <div class="td-brand"><i class="ti ti-building-hospital"></i> ClinicCare OPD</div>
+            <div class="td-clock" id="tdClock">{{ now()->format('l, d F Y — h:i A') }}</div>
+        </div>
+        <div class="td-live-badge">
+            <span class="td-live-dot" aria-hidden="true"></span>
+            Live Queue
+        </div>
+    </header>
+
+    <main class="token-display-main">
+        @yield('content')
+    </main>
+
+    <footer class="td-footer">ClinicCare Hospital Management System</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     @livewireScripts
-    <script>document.addEventListener('DOMContentLoaded',()=>window.initHmsRealtime?.(0));</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.initHmsRealtime?.(0);
+            const tick = () => {
+                const el = document.getElementById('tdClock');
+                if (!el) return;
+                el.textContent = new Date().toLocaleString('en-IN', {
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+            };
+            tick();
+            setInterval(tick, 30000);
+        });
+    </script>
+    @stack('scripts')
 </body>
 </html>

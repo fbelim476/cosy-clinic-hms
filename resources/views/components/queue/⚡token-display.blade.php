@@ -2,11 +2,10 @@
 
 use App\Enums\VisitStatus;
 use App\Models\PatientVisit;
-use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-new #[Layout('layouts.display')] class extends Component
+new class extends Component
 {
     #[On('queue-updated')]
     public function refreshDisplay(): void {}
@@ -22,32 +21,55 @@ new #[Layout('layouts.display')] class extends Component
                 ->where('status', VisitStatus::Waiting)
                 ->whereDate('created_at', today())
                 ->orderByRaw("CASE WHEN priority = 'emergency' THEN 0 ELSE 1 END")
-                ->orderBy('token_number')->limit(6)->get(),
+                ->orderBy('token_number')->limit(8)->get(),
             'waitingCount' => PatientVisit::where('status', VisitStatus::Waiting)->whereDate('created_at', today())->count(),
         ];
     }
 };
 ?>
 
-<div wire:poll.3s class="token-display-premium" x-data x-init="if(window.Echo){Echo.channel('cliniccare-queue').listen('.visit-queue-updated',()=>$wire.$refresh())}">
-    <div class="row g-5 align-items-center text-center">
-        <div class="col-lg-6">
-            <div class="display-label">NOW SERVING</div>
-            <div class="display-token-hero" wire:transition>{{ $current?->token_number ?? '—' }}</div>
-            <div class="display-patient-name">{{ $current?->patient?->name ?? 'Please wait' }}</div>
-        </div>
-        <div class="col-lg-6">
-            <div class="display-label">WAITING — {{ $waitingCount }} patients</div>
-            <div class="row g-3 mt-2 justify-content-center">
-                @foreach($next as $v)
-                    <div class="col-4 col-md-3">
-                        <div class="next-token-box {{ $v->isEmergency() ? 'emergency' : '' }}" wire:key="t-{{ $v->id }}">
-                            <div class="next-num">#{{ $v->token_number }}</div>
-                            <div class="next-name">{{ Str::limit($v->patient->name, 12) }}</div>
-                        </div>
-                    </div>
-                @endforeach
+<div
+    wire:poll.3s
+    class="token-display-body"
+    x-data
+    x-init="if (window.Echo) { Echo.channel('cliniccare-queue').listen('.visit-queue-updated', () => $wire.$refresh()) }"
+>
+    <div class="td-layout">
+        {{-- NOW SERVING --}}
+        <section class="td-now-panel" aria-label="Now serving">
+            <div class="td-now-label">Now Serving</div>
+            <div class="td-token" wire:key="current-token-{{ $current?->id ?? 0 }}">
+                {{ $current?->token_number ?? '—' }}
             </div>
-        </div>
+            <div class="td-patient" wire:key="current-name-{{ $current?->id ?? 0 }}">
+                {{ $current?->patient?->name ?? 'Please wait' }}
+            </div>
+            @if($current?->isEmergency())
+                <span class="td-emergency-badge" wire:key="current-er-{{ $current->id }}">Emergency</span>
+            @endif
+        </section>
+
+        {{-- UP NEXT --}}
+        <aside class="td-next-panel" aria-label="Up next">
+            <div class="td-next-title">
+                Up Next — <span class="td-next-count">{{ $waitingCount }}</span> waiting
+            </div>
+            <div class="td-next-grid">
+                @forelse($next as $v)
+                    <div
+                        class="td-next {{ $v->isEmergency() ? 'emergency' : '' }}"
+                        wire:key="next-{{ $v->id }}"
+                    >
+                        <div class="td-next-num">#{{ $v->token_number }}</div>
+                        <div class="td-next-name">{{ $v->patient->name }}</div>
+                    </div>
+                @empty
+                    <div class="td-next td-next-empty">
+                        <div class="td-next-num">—</div>
+                        <div class="td-next-name">No patients in queue</div>
+                    </div>
+                @endforelse
+            </div>
+        </aside>
     </div>
 </div>

@@ -19,7 +19,9 @@ class PrintController extends Controller
         $visit->load(['patient', 'department', 'doctor.user']);
         $qr = app(PatientService::class)->generateOpdQr($visit);
 
-        return view('prints.opd-slip', compact('visit', 'qr'));
+        $embed = request()->boolean('embed');
+
+        return view('prints.opd-slip', compact('visit', 'qr', 'embed'));
     }
 
     public function prescription(PatientVisit $visit)

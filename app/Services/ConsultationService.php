@@ -71,6 +71,9 @@ class ConsultationService
                         'days' => $med['days'] ?? null,
                         'quantity' => $med['quantity'] ?? 1,
                         'notes' => $med['notes'] ?? null,
+                        'unit_price' => $med['unit_price'] ?? 0,
+                        'gst_percent' => $med['gst_percent'] ?? 0,
+                        'sku' => $med['sku'] ?? null,
                     ]);
                 }
             }

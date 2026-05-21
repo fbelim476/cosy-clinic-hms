@@ -74,10 +74,10 @@ new class extends Component
 ?>
 
 <div wire:poll.20s x-data="adminCharts()" x-init="init(@js(array_values($chart)), @js(array_keys($chart)))">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="cc-page-header">
         <div>
-            <h2 class="h3 fw-bold mb-0">Analytics Dashboard</h2>
-            <span class="text-muted small"><span class="live-dot"></span> Auto-refreshing metrics</span>
+            <h1 class="cc-page-title"><i class="ti ti-chart-dots text-primary me-2"></i>Analytics Dashboard</h1>
+            <p class="cc-page-subtitle"><span class="live-dot"></span> Enterprise metrics — auto-refreshing</p>
         </div>
     </div>
 

@@ -44,6 +44,8 @@ new class extends Component
     public ?int $department_id = null;
     public ?int $doctor_id = null;
     public $photo;
+    public ?int $printVisitId = null;
+    public bool $showPrintModal = false;
 
     public function updatedSearch(): void
     {
@@ -128,8 +130,28 @@ new class extends Component
             auth()->id()
         );
 
-        $this->dispatch('notify', title: 'Registered', message: "Token #{$visit->token_number} generated", type: 'success');
-        $this->redirect(route('print.opd-slip', $visit), navigate: true);
+        $this->printVisitId = $visit->id;
+        $this->showPrintModal = true;
+        $this->dispatch('notify', title: 'Patient Registered Successfully', message: "Token #{$visit->token_number} generated", type: 'success');
+        $this->dispatch('open-opd-print', url: route('print.opd-slip', ['visit' => $visit, 'embed' => 1]));
+    }
+
+    public function closePrintAndReset(): void
+    {
+        $this->showPrintModal = false;
+        $this->printVisitId = null;
+        $this->reset([
+            'step', 'mode', 'isExisting', 'patientId', 'search', 'searchResults', 'duplicateWarning',
+            'name', 'mobile', 'alternate_mobile', 'gender', 'age', 'dob', 'blood_group',
+            'address', 'city', 'state', 'pincode', 'chief_complaint', 'symptoms',
+            'bp', 'sugar_rbs', 'temperature', 'spo2', 'weight', 'height',
+            'visit_type', 'priority', 'department_id', 'doctor_id', 'photo',
+        ]);
+        $this->step = 1;
+        $this->mode = 'opd';
+        $this->gender = 'male';
+        $this->visit_type = 'opd';
+        $this->priority = 'normal';
     }
 
     public function with(): array
@@ -261,8 +283,60 @@ new class extends Component
             </form>
         </div>
     </div>
+
+    @if($showPrintModal && $printVisitId)
+        <div class="modal show d-block" tabindex="-1" style="background:rgba(15,23,42,0.55);z-index:1060"
+             x-data="opdPrintModal()" x-init="init(@js(route('print.opd-slip', ['visit' => $printVisitId, 'embed' => 1])))"
+             @keydown.escape.window="$wire.closePrintAndReset()">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius:16px;overflow:hidden">
+                    <div class="modal-header border-0" style="background:var(--cc-primary-light)">
+                        <h5 class="modal-title fw-bold"><i class="ti ti-printer me-2"></i>OPD Token Slip</h5>
+                        <button type="button" class="btn-close" wire:click="closePrintAndReset"></button>
+                    </div>
+                    <div class="modal-body p-0 bg-light">
+                        <iframe id="opdPrintFrame" src="" style="width:100%;height:420px;border:0" title="OPD Slip"></iframe>
+                    </div>
+                    <div class="modal-footer border-0 gap-2">
+                        <button type="button" class="btn btn-outline-secondary" wire:click="closePrintAndReset">Done — New Registration</button>
+                        <button type="button" class="btn btn-primary" @click="printSlip()"><i class="ti ti-printer"></i> Print Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 @script
-<script>$wire.on('notify', (p) => window.showToast?.(p.title, p.message, p.type));</script>
+<script>
+$wire.on('notify', (p) => window.showToast?.(p.title, p.message, p.type));
+
+window.opdPrintModal = () => ({
+    printUrl: '',
+    init(url) {
+        this.printUrl = url;
+        const frame = document.getElementById('opdPrintFrame');
+        if (!frame) return;
+        frame.src = url;
+        frame.onload = () => {
+            setTimeout(() => {
+                try {
+                    frame.contentWindow?.focus();
+                    frame.contentWindow?.print();
+                } catch (e) {
+                    window.open(url, '_blank', 'width=420,height=640');
+                }
+            }, 500);
+        };
+    },
+    printSlip() {
+        const frame = document.getElementById('opdPrintFrame');
+        try {
+            frame?.contentWindow?.print();
+        } catch (e) {
+            window.open(this.printUrl, '_blank');
+        }
+    },
+});
+</script>
 @endscript
