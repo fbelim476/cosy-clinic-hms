@@ -14,7 +14,7 @@
 </head>
 <body onload="window.print()">
     <div class="header">
-        <h2>{{ \App\Models\HospitalSetting::get('hospital_name', 'ClinicCare HMS') }}</h2>
+        <h2>{{ \App\Models\HospitalSetting::get('hospital_name', 'CosyClinic HMS') }}</h2>
         <div>Medical Store / Pharmacy Invoice</div>
         <div>GST: {{ \App\Models\HospitalSetting::get('gst_number', '') }}</div>
     </div>

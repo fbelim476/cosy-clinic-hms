@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class ClinicCareSeeder extends Seeder
+class CosyClinicSeeder extends Seeder
 {
     public function run(): void
     {
@@ -55,13 +55,13 @@ class ClinicCareSeeder extends Seeder
         $branch = Branch::firstOrCreate(
             ['code' => 'MAIN'],
             [
-                'name' => 'ClinicCare Charitable Trust Hospital',
+                'name' => 'CosyClinic Charitable Trust Hospital',
                 'address' => '123 Medical Campus Road',
                 'city' => 'Mumbai',
                 'state' => 'Maharashtra',
                 'pincode' => '400001',
                 'phone' => '+91 98765 43210',
-                'email' => 'info@cliniccare.org',
+                'email' => 'info@CosyClinic.org',
                 'gst_number' => '27AAAAA0000A1Z5',
             ]
         );
@@ -77,13 +77,13 @@ class ClinicCareSeeder extends Seeder
         );
 
         $users = [
-            ['name' => 'Super Admin', 'email' => 'admin@cliniccare.test', 'role' => 'super-admin', 'designation' => 'Administrator'],
-            ['name' => 'Reception Desk', 'email' => 'reception@cliniccare.test', 'role' => 'receptionist', 'designation' => 'Receptionist'],
-            ['name' => 'Dr. Rajesh Kumar', 'email' => 'doctor@cliniccare.test', 'role' => 'doctor', 'designation' => 'Senior Physician'],
-            ['name' => 'Pharmacy Counter', 'email' => 'pharmacy@cliniccare.test', 'role' => 'pharmacist', 'designation' => 'Pharmacist'],
-            ['name' => 'Accounts Desk', 'email' => 'accounts@cliniccare.test', 'role' => 'accountant', 'designation' => 'Accountant'],
-            ['name' => 'Lab Technician', 'email' => 'lab@cliniccare.test', 'role' => 'lab-technician', 'designation' => 'Lab Technician'],
-            ['name' => 'Nurse Station', 'email' => 'nurse@cliniccare.test', 'role' => 'nurse', 'designation' => 'Staff Nurse'],
+            ['name' => 'Super Admin', 'email' => 'admin@CosyClinic.test', 'role' => 'super-admin', 'designation' => 'Administrator'],
+            ['name' => 'Reception Desk', 'email' => 'reception@CosyClinic.test', 'role' => 'receptionist', 'designation' => 'Receptionist'],
+            ['name' => 'Dr. Rajesh Kumar', 'email' => 'doctor@CosyClinic.test', 'role' => 'doctor', 'designation' => 'Senior Physician'],
+            ['name' => 'Pharmacy Counter', 'email' => 'pharmacy@CosyClinic.test', 'role' => 'pharmacist', 'designation' => 'Pharmacist'],
+            ['name' => 'Accounts Desk', 'email' => 'accounts@CosyClinic.test', 'role' => 'accountant', 'designation' => 'Accountant'],
+            ['name' => 'Lab Technician', 'email' => 'lab@CosyClinic.test', 'role' => 'lab-technician', 'designation' => 'Lab Technician'],
+            ['name' => 'Nurse Station', 'email' => 'nurse@CosyClinic.test', 'role' => 'nurse', 'designation' => 'Staff Nurse'],
         ];
 
         foreach ($users as $u) {
@@ -144,12 +144,12 @@ class ClinicCareSeeder extends Seeder
         }
 
         $settings = [
-            ['key' => 'hospital_name', 'value' => 'ClinicCare Charitable Trust Hospital', 'group' => 'general'],
+            ['key' => 'hospital_name', 'value' => 'CosyClinic Charitable Trust Hospital', 'group' => 'general'],
             ['key' => 'hospital_address', 'value' => '123 Medical Campus Road, Mumbai - 400001', 'group' => 'general'],
             ['key' => 'hospital_phone', 'value' => '+91 98765 43210', 'group' => 'general'],
             ['key' => 'gst_number', 'value' => '27AAAAA0000A1Z5', 'group' => 'billing'],
-            ['key' => 'prescription_header', 'value' => 'ClinicCare HMS - OPD Prescription', 'group' => 'print'],
-            ['key' => 'invoice_footer', 'value' => 'Thank you for visiting ClinicCare. Get well soon!', 'group' => 'print'],
+            ['key' => 'prescription_header', 'value' => 'CosyClinic HMS - OPD Prescription', 'group' => 'print'],
+            ['key' => 'invoice_footer', 'value' => 'Thank you for visiting CosyClinic. Get well soon!', 'group' => 'print'],
         ];
 
         foreach ($settings as $s) {

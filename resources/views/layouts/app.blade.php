@@ -7,7 +7,7 @@
     <script>
         (function(){var t=localStorage.getItem('cc-theme');if(t)document.documentElement.setAttribute('data-bs-theme',t);if(localStorage.getItem('cc-sidebar-collapsed')==='1')document.documentElement.classList.add('sidebar-collapsed-pending');})();
     </script>
-    <title>@yield('title', 'ClinicCare HMS') — Enterprise Medical ERP</title>
+    <title>@yield('title', 'CosyClinic HMS') — Enterprise Medical ERP</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css" rel="stylesheet">
@@ -32,7 +32,7 @@
             @yield('content')
         </div>
         <footer class="text-center text-muted py-3 small opacity-75 d-none d-lg-block">
-            ClinicCare HMS &mdash; Enterprise Hospital Management
+            CosyClinic HMS &mdash; Enterprise Hospital Management
         </footer>
     </div>
     @include('layouts.partials.mobile-nav')

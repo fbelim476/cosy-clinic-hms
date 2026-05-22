@@ -8,7 +8,7 @@
         </button>
         <div class="d-none d-md-block ms-1">
             <div class="small text-muted lh-1">@yield('title', 'Dashboard')</div>
-            <div class="fw-bold lh-sm">ClinicCare HMS</div>
+            <div class="fw-bold lh-sm">CosyClinic HMS</div>
         </div>
     </div>
 

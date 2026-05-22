@@ -3,7 +3,7 @@
     <div class="cc-sidebar-brand">
         <div class="cc-brand-icon"><i class="ti ti-building-hospital"></i></div>
         <div class="cc-brand-text">
-            <div>ClinicCare</div>
+            <div>CosyClinic</div>
             <div class="cc-brand-sub">Enterprise HMS</div>
         </div>
     </div>

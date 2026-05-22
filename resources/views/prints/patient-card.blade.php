@@ -14,7 +14,7 @@
 <body onload="window.print()">
     <div class="card">
         <div class="qr">{!! $qr !!}</div>
-        <div class="logo">ClinicCare HMS</div>
+        <div class="logo">CosyClinic HMS</div>
         <div class="pid">{{ $patient->patient_id }}</div>
         <p><strong>{{ $patient->name }}</strong></p>
         <p>{{ $patient->mobile }} | {{ $patient->age }} / {{ ucfirst($patient->gender ?? '-') }}</p>

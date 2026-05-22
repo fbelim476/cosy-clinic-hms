@@ -88,7 +88,7 @@
     @endunless
 
     <div class="opd-header">
-        <h1>{{ \App\Models\HospitalSetting::get('hospital_name', 'ClinicCare HMS') }}</h1>
+        <h1>{{ \App\Models\HospitalSetting::get('hospital_name', 'CosyClinic HMS') }}</h1>
         <div class="addr">{{ \App\Models\HospitalSetting::get('hospital_address', '') }}</div>
         <div class="slip-type">OPD REGISTRATION SLIP</div>
     </div>

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>OPD Token Display — ClinicCare HMS</title>
+    <title>OPD Token Display — CosyClinic HMS</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
 <body class="token-display-screen">
     <header class="td-header">
         <div>
-            <div class="td-brand"><i class="ti ti-building-hospital"></i> ClinicCare OPD</div>
+            <div class="td-brand"><i class="ti ti-building-hospital"></i> CosyClinic OPD</div>
             <div class="td-clock" id="tdClock">{{ now()->format('l, d F Y — h:i A') }}</div>
         </div>
         <div class="td-live-badge">
@@ -47,7 +47,7 @@
         @yield('content')
     </main>
 
-    <footer class="td-footer">ClinicCare Hospital Management System</footer>
+    <footer class="td-footer">CosyClinic Hospital Management System</footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     @livewireScripts

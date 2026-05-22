@@ -3,11 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign In — ClinicCare HMS</title>
+    <title>Sign In — CosyClinic HMS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/premium.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     <style>
         body {
             min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center;
@@ -53,7 +54,7 @@
     <div class="login-wrap">
         <div class="login-card">
             <div class="login-brand"><i class="ti ti-building-hospital"></i></div>
-            <h1 class="login-title">ClinicCare HMS</h1>
+            <h1 class="login-title">CosyClinic HMS</h1>
             <p class="login-sub">Enterprise Hospital Management System</p>
             @if($errors->any())
                 <div class="alert alert-danger py-2 mb-3">{{ $errors->first() }}</div>
@@ -62,7 +63,7 @@
                 @csrf
                 <div class="mb-3">
                     <label class="form-label fw-semibold small">Email address</label>
-                    <input type="email" name="email" class="form-control form-control-lg" value="{{ old('email', 'admin@cliniccare.test') }}" required autofocus>
+                    <input type="email" name="email" class="form-control form-control-lg" value="{{ old('email', 'admin@cosyclinic.test') }}" required autofocus>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-semibold small">Password</label>
@@ -73,11 +74,11 @@
                 </button>
             </form>
             <div class="demo-box">
-                <strong>Demo access:</strong> admin@cliniccare.test / password<br>
+                <strong>Demo access:</strong> admin@cosyclinic.test / password<br>
                 <span class="text-muted">Also: reception@ · doctor@ · pharmacy@ · accounts@</span>
             </div>
         </div>
-        <p class="text-center text-white-50 small mt-4 mb-0 opacity-75">&copy; {{ date('Y') }} ClinicCare — Medical ERP</p>
+        <p class="text-center text-white-50 small mt-4 mb-0 opacity-75">&copy; {{ date('Y') }} CosyClinic — Medical ERP</p>
     </div>
 </body>
 </html>

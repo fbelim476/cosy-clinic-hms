@@ -1,4 +1,4 @@
-# ClinicCare HMS — Hospital Management System
+# CosyClinic HMS — Hospital Management System
 
 Enterprise-grade OPD clinic and hospital management system built with **Laravel 13**, **PHP 8.3**, **Livewire 4**, **MySQL/SQLite**, **Spatie Permissions**, **Tabler UI**, and **DomPDF**.
 
@@ -24,7 +24,7 @@ Enterprise-grade OPD clinic and hospital management system built with **Laravel 
 ## Installation (XAMPP / LAMPP)
 
 ```bash
-cd "/opt/lampp/htdocs/ClinicCare HMS"
+cd "/opt/lampp/htdocs/CosyClinic HMS"
 composer install
 cp .env.example .env
 php artisan key:generate
@@ -36,7 +36,7 @@ php artisan key:generate
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=cliniccare_hms
+DB_DATABASE=CosyClinic_hms
 DB_USERNAME=root
 DB_PASSWORD=
 ```
@@ -59,13 +59,13 @@ For XAMPP, point Apache document root or create a virtual host to `/public`.
 
 | Role | Email | Password |
 |------|-------|----------|
-| Super Admin | admin@cliniccare.test | password |
-| Receptionist | reception@cliniccare.test | password |
-| Doctor | doctor@cliniccare.test | password |
-| Pharmacist | pharmacy@cliniccare.test | password |
-| Accountant | accounts@cliniccare.test | password |
-| Lab Technician | lab@cliniccare.test | password |
-| Nurse | nurse@cliniccare.test | password |
+| Super Admin | admin@CosyClinic.test | password |
+| Receptionist | reception@CosyClinic.test | password |
+| Doctor | doctor@CosyClinic.test | password |
+| Pharmacist | pharmacy@CosyClinic.test | password |
+| Accountant | accounts@CosyClinic.test | password |
+| Lab Technician | lab@CosyClinic.test | password |
+| Nurse | nurse@CosyClinic.test | password |
 
 ## Workflow
 
@@ -137,7 +137,7 @@ Ensure `.env` has:
 
 ```env
 BROADCAST_CONNECTION=reverb
-REVERB_APP_ID=cliniccare-hms
+REVERB_APP_ID=CosyClinic-hms
 REVERB_APP_KEY=your-key
 REVERB_APP_SECRET=your-secret
 REVERB_HOST=localhost

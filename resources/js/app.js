@@ -52,12 +52,12 @@ window.playNotificationSound = () => {
 window.initHmsRealtime = (userId) => {
     if (!window.Echo) return;
 
-    window.Echo.channel('cliniccare-queue')
+    window.Echo.channel('CosyClinic-queue')
         .listen('.visit-queue-updated', (e) => {
             Livewire.dispatch('queue-updated', e);
         });
 
-    window.Echo.channel('cliniccare-dashboard')
+    window.Echo.channel('CosyClinic-dashboard')
         .listen('.dashboard-stats-updated', (e) => {
             Livewire.dispatch('dashboard-updated', e.stats || {});
         })

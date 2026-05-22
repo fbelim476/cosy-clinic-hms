@@ -1,4 +1,4 @@
-/* ClinicCare HMS — Real-time + UI helpers (CDN-compatible) */
+/* CosyClinic HMS — Real-time + UI helpers (CDN-compatible) */
 (function () {
     const cfg = window.__CC_REVERB__ || {};
     if (typeof Pusher !== 'undefined' && cfg.key) {
@@ -37,10 +37,10 @@
 
     window.initHmsRealtime = function (userId) {
         if (!window.Echo) return;
-        window.Echo.channel('cliniccare-queue').listen('.visit-queue-updated', function (e) {
+        window.Echo.channel('CosyClinic-queue').listen('.visit-queue-updated', function (e) {
             if (window.Livewire) Livewire.dispatch('queue-updated', e);
         });
-        window.Echo.channel('cliniccare-dashboard')
+        window.Echo.channel('CosyClinic-dashboard')
             .listen('.dashboard-stats-updated', function (e) {
                 if (window.Livewire) Livewire.dispatch('dashboard-updated', e);
             })

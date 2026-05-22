@@ -24,8 +24,8 @@ class VisitQueueUpdated implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new Channel('cliniccare-queue'),
-            new Channel('cliniccare-dashboard'),
+            new Channel('CosyClinic-queue'),
+            new Channel('CosyClinic-dashboard'),
         ];
     }
 

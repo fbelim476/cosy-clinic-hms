@@ -1,5 +1,5 @@
 /**
- * ClinicCare HMS — Shell: sidebar, theme, tooltips
+ * CosyClinic HMS — Shell: sidebar, theme, tooltips
  */
 (function () {
     function applyTheme(mode) {

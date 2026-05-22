@@ -13,7 +13,7 @@
 </head>
 <body onload="window.print()">
     <div class="header">
-        <h2 style="margin:0">{{ \App\Models\HospitalSetting::get('prescription_header', 'ClinicCare HMS Prescription') }}</h2>
+        <h2 style="margin:0">{{ \App\Models\HospitalSetting::get('prescription_header', 'CosyClinic HMS Prescription') }}</h2>
         <p>Dr. {{ $visit->doctor?->user?->name }} — {{ $visit->doctor?->specialization }}</p>
     </div>
     <p><strong>Patient:</strong> {{ $visit->patient->name }} | <strong>ID:</strong> {{ $visit->patient->patient_id }} | <strong>Date:</strong> {{ now()->format('d/m/Y') }}</p>

@@ -16,7 +16,7 @@ class DashboardStatsUpdated implements ShouldBroadcastNow
 
     public function broadcastOn(): array
     {
-        return [new Channel('cliniccare-dashboard')];
+        return [new Channel('CosyClinic-dashboard')];
     }
 
     public function broadcastAs(): string

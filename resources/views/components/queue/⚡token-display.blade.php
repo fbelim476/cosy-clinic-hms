@@ -32,7 +32,7 @@ new class extends Component
     wire:poll.3s
     class="token-display-body"
     x-data
-    x-init="if (window.Echo) { Echo.channel('cliniccare-queue').listen('.visit-queue-updated', () => $wire.$refresh()) }"
+    x-init="if (window.Echo) { Echo.channel('CosyClinic-queue').listen('.visit-queue-updated', () => $wire.$refresh()) }"
 >
     <div class="td-layout">
         {{-- NOW SERVING --}}
