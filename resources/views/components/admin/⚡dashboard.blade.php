@@ -73,7 +73,7 @@ new class extends Component
 };
 ?>
 
-<div wire:poll.20s x-data="adminCharts()" x-init="init(@js(array_values($chart)), @js(array_keys($chart)))">
+<div wire:poll.20s class="admin-analytics" x-data="adminCharts()" x-init="init(@js(array_values($chart)), @js(array_keys($chart)))">
     <div class="cc-page-header">
         <div>
             <h1 class="cc-page-title"><i class="ti ti-chart-dots text-primary me-2"></i>Analytics Dashboard</h1>
@@ -81,53 +81,70 @@ new class extends Component
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4 adm-stats-grid">
         @foreach([
-            ['k'=>'today','label'=>"Today's OPD",'icon'=>'ti-users','gradient'=>true],
-            ['k'=>'waiting','label'=>'Waiting Queue','icon'=>'ti-hourglass','gradient'=>false],
-            ['k'=>'revenue','label'=>'Revenue Today','icon'=>'ti-currency-rupee','gradient'=>true,'prefix'=>'₹'],
-            ['k'=>'pharmacy','label'=>'Pharmacy Sales','icon'=>'ti-vaccine','gradient'=>false,'prefix'=>'₹'],
-            ['k'=>'emergency','label'=>'Emergency','icon'=>'ti-alert-triangle','gradient'=>false,'danger'=>true],
-            ['k'=>'pending_bills','label'=>'Pending Bills','icon'=>'ti-receipt','gradient'=>false],
-            ['k'=>'low_stock','label'=>'Stock Alerts','icon'=>'ti-package','gradient'=>false],
-            ['k'=>'doctors_online','label'=>'Doctors Online','icon'=>'ti-stethoscope','gradient'=>false],
+            ['k'=>'today','label'=>"Today's OPD",'icon'=>'ti-users','variant'=>'gradient'],
+            ['k'=>'waiting','label'=>'Waiting Queue','icon'=>'ti-hourglass','variant'=>'soft'],
+            ['k'=>'revenue','label'=>'Revenue Today','icon'=>'ti-currency-rupee','variant'=>'gradient','prefix'=>'₹'],
+            ['k'=>'pharmacy','label'=>'Pharmacy Sales','icon'=>'ti-vaccine','variant'=>'soft','prefix'=>'₹'],
+            ['k'=>'emergency','label'=>'Emergency','icon'=>'ti-alert-triangle','variant'=>'soft','danger'=>true],
+            ['k'=>'pending_bills','label'=>'Pending Bills','icon'=>'ti-receipt','variant'=>'soft'],
+            ['k'=>'low_stock','label'=>'Stock Alerts','icon'=>'ti-package','variant'=>'soft'],
+            ['k'=>'doctors_online','label'=>'Doctors Online','icon'=>'ti-stethoscope','variant'=>'soft'],
         ] as $w)
+            @php
+                $val = $stats[$w['k']] ?? 0;
+                $display = ($w['prefix'] ?? '') . (is_float($val) && $val != floor($val) ? number_format($val, 2) : number_format($val, 0));
+            @endphp
             <div class="col-6 col-md-4 col-xl-3">
-                @if($w['gradient'] ?? false)
-                    <div class="stat-gradient premium-card p-3 interactive">
-                        <i class="ti {{ $w['icon'] }} opacity-50"></i>
-                        <div class="small opacity-75 mt-2">{{ $w['label'] }}</div>
-                        <div class="stat-value">{{ ($w['prefix'] ?? '') . number_format($stats[$w['k']] ?? 0, ($w['prefix'] ?? false) ? 0 : 0) }}</div>
+                <div class="adm-stat-card adm-stat-{{ $w['variant'] }} {{ ($w['danger'] ?? false) ? 'adm-stat-danger' : '' }}">
+                    <div class="adm-stat-icon-wrap">
+                        <i class="ti {{ $w['icon'] }}"></i>
                     </div>
-                @else
-                    <div class="stat-soft premium-card p-3 interactive {{ ($w['danger'] ?? false) ? 'border-danger' : '' }}">
-                        <i class="ti {{ $w['icon'] }} text-primary"></i>
-                        <div class="text-muted small mt-2">{{ $w['label'] }}</div>
-                        <div class="fs-4 fw-bold {{ ($w['danger'] ?? false) ? 'text-danger' : '' }}">{{ $stats[$w['k']] ?? 0 }}</div>
-                    </div>
-                @endif
+                    <div class="adm-stat-label">{{ $w['label'] }}</div>
+                    <div class="adm-stat-value">{{ $display }}</div>
+                </div>
             </div>
         @endforeach
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 adm-panels-row">
         <div class="col-lg-8">
-            <div class="premium-card p-3">
-                <h4 class="mb-3">OPD Visits — Last 7 Days</h4>
-                <div id="opdChart" style="min-height:280px"></div>
+            <div class="premium-card adm-panel">
+                <div class="cc-card-header adm-panel-header">
+                    <div class="adm-panel-heading">
+                        <span class="adm-panel-icon adm-panel-icon-chart"><i class="ti ti-chart-area-line"></i></span>
+                        <div class="adm-panel-titles">
+                            <h3 class="adm-panel-title">OPD Visits — Last 7 Days</h3>
+                            <p class="adm-panel-subtitle">Daily patient visit trend</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="adm-panel-body adm-chart-body">
+                    <div id="opdChart"></div>
+                </div>
             </div>
         </div>
         <div class="col-lg-4">
-            <div class="premium-card">
-                <div class="card-header border-0"><h4 class="mb-0">Live Activity</h4></div>
-                <ul class="list-group list-group-flush">
+            <div class="premium-card adm-panel h-100">
+                <div class="cc-card-header adm-panel-header">
+                    <div class="adm-panel-heading">
+                        <span class="adm-panel-icon adm-panel-icon-live"><i class="ti ti-activity"></i></span>
+                        <div class="adm-panel-titles">
+                            <h3 class="adm-panel-title">Live Activity</h3>
+                            <p class="adm-panel-subtitle">Recent patient movements</p>
+                        </div>
+                    </div>
+                    <span class="badge bg-success-lt adm-live-pill"><span class="live-dot"></span> Live</span>
+                </div>
+                <ul class="list-group list-group-flush adm-activity-list">
                     @foreach($recent as $v)
-                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                            <div>
-                                <strong>{{ $v->patient->name }}</strong>
-                                <div class="small text-muted">{{ $v->created_at->diffForHumans() }}</div>
+                        <li class="list-group-item adm-activity-item">
+                            <div class="adm-activity-main">
+                                <strong class="adm-activity-name">{{ $v->patient->name }}</strong>
+                                <span class="adm-activity-time">{{ $v->created_at->diffForHumans() }}</span>
                             </div>
-                            <span class="badge {{ $v->status->badgeClass() }}">{{ $v->status->label() }}</span>
+                            <span class="badge {{ $v->status->badgeClass() }} adm-activity-badge">{{ $v->status->label() }}</span>
                         </li>
                     @endforeach
                 </ul>

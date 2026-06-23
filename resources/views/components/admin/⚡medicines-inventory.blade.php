@@ -280,40 +280,95 @@ new class extends Component
     <div class="mt-3">{{ $medicines->links() }}</div>
 
     @if($showForm)
-        <div class="modal show d-block" style="background:rgba(15,23,42,0.5)">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                <div class="modal-content border-0 shadow-lg" style="border-radius:16px">
-                    <div class="modal-header"><h5 class="modal-title fw-bold">{{ $editingId ? 'Edit' : 'Add' }} Medicine</h5>
-                        <button type="button" class="btn-close" wire:click="$set('showForm', false)"></button></div>
-                    <form wire:submit="save">
-                        <div class="modal-body">
-                            <div class="row g-3">
-                                <div class="col-md-6"><label class="form-label">Name *</label><input wire:model="name" class="form-control" required></div>
-                                <div class="col-md-6"><label class="form-label">Generic Name</label><input wire:model="generic_name" class="form-control"></div>
-                                <div class="col-md-4"><label class="form-label">SKU</label><input wire:model="sku" class="form-control"></div>
-                                <div class="col-md-4"><label class="form-label">Barcode</label><input wire:model="barcode" class="form-control"></div>
-                                <div class="col-md-4"><label class="form-label">Type</label>
-                                    <select wire:model="medicine_type" class="form-select">
-                                        <option value="tablet">Tablet</option><option value="syrup">Syrup</option>
-                                        <option value="injection">Injection</option><option value="capsule">Capsule</option>
-                                    </select></div>
-                                <div class="col-md-4"><label class="form-label">Selling Price *</label><input type="number" step="0.01" wire:model="selling_price" class="form-control"></div>
-                                <div class="col-md-4"><label class="form-label">Purchase Price</label><input type="number" step="0.01" wire:model="purchase_price" class="form-control"></div>
-                                <div class="col-md-4"><label class="form-label">GST %</label><input type="number" step="0.01" wire:model="gst_percent" class="form-control"></div>
-                                <div class="col-md-4"><label class="form-label">Strength</label><input wire:model="strength" class="form-control"></div>
-                                <div class="col-md-4"><label class="form-label">Manufacturer</label><input wire:model="manufacturer" class="form-control"></div>
-                                <div class="col-md-4"><label class="form-label">Reorder Level</label><input type="number" wire:model="reorder_level" class="form-control"></div>
+        <div class="modal show d-block cc-med-modal-backdrop" tabindex="-1" role="dialog" aria-modal="true">
+            <div class="modal-dialog modal-lg cc-med-modal-dialog modal-dialog-centered">
+                <div class="modal-content cc-med-modal-content border-0 shadow-lg">
+                    <div class="modal-header cc-med-modal-header">
+                        <h5 class="modal-title fw-bold">{{ $editingId ? 'Edit' : 'Add' }} Medicine</h5>
+                        <button type="button" class="btn-close" wire:click="$set('showForm', false)" aria-label="Close"></button>
+                    </div>
+                    <form wire:submit="save" class="cc-med-modal-form">
+                        <div class="modal-body cc-med-modal-body">
+                            <div class="row g-3 cc-med-form-grid">
+                                <div class="col-12 col-md-6 col-lg-6">
+                                    <label class="form-label cc-med-label">Name *</label>
+                                    <input wire:model="name" class="form-control cc-med-input" required>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-6">
+                                    <label class="form-label cc-med-label">Generic Name</label>
+                                    <input wire:model="generic_name" class="form-control cc-med-input">
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <label class="form-label cc-med-label">SKU</label>
+                                    <input wire:model="sku" class="form-control cc-med-input">
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <label class="form-label cc-med-label">Barcode</label>
+                                    <input wire:model="barcode" class="form-control cc-med-input">
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <label class="form-label cc-med-label">Type</label>
+                                    <select wire:model="medicine_type" class="form-select cc-med-input">
+                                        <option value="tablet">Tablet</option>
+                                        <option value="syrup">Syrup</option>
+                                        <option value="injection">Injection</option>
+                                        <option value="capsule">Capsule</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <label class="form-label cc-med-label">Selling Price *</label>
+                                    <input type="number" step="0.01" wire:model="selling_price" class="form-control cc-med-input">
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <label class="form-label cc-med-label">Purchase Price</label>
+                                    <input type="number" step="0.01" wire:model="purchase_price" class="form-control cc-med-input">
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <label class="form-label cc-med-label">GST %</label>
+                                    <input type="number" step="0.01" wire:model="gst_percent" class="form-control cc-med-input">
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <label class="form-label cc-med-label">Strength</label>
+                                    <input wire:model="strength" class="form-control cc-med-input">
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <label class="form-label cc-med-label">Manufacturer</label>
+                                    <input wire:model="manufacturer" class="form-control cc-med-input">
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <label class="form-label cc-med-label">Reorder Level</label>
+                                    <input type="number" wire:model="reorder_level" class="form-control cc-med-input">
+                                </div>
                                 @unless($editingId)
-                                    <div class="col-md-4"><label class="form-label">Initial Stock</label><input type="number" wire:model="initial_stock" class="form-control"></div>
-                                    <div class="col-md-4"><label class="form-label">Batch No</label><input wire:model="batch_number" class="form-control"></div>
-                                    <div class="col-md-4"><label class="form-label">Expiry</label><input type="date" wire:model="expiry_date" class="form-control"></div>
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <label class="form-label cc-med-label">Initial Stock</label>
+                                        <input type="number" wire:model="initial_stock" class="form-control cc-med-input">
+                                    </div>
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <label class="form-label cc-med-label">Batch No</label>
+                                        <input wire:model="batch_number" class="form-control cc-med-input">
+                                    </div>
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <label class="form-label cc-med-label">Expiry</label>
+                                        <input type="date" wire:model="expiry_date" class="form-control cc-med-input">
+                                    </div>
                                 @endunless
-                                <div class="col-12"><label class="form-label">Description</label><textarea wire:model="description" class="form-control" rows="2"></textarea></div>
-                                <div class="col-12"><label class="form-check"><input type="checkbox" wire:model="is_active" class="form-check-input"> Active</label></div>
+                                <div class="col-12">
+                                    <label class="form-label cc-med-label">Description</label>
+                                    <textarea wire:model="description" class="form-control cc-med-textarea" rows="3"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-check cc-med-check">
+                                        <input type="checkbox" wire:model="is_active" class="form-check-input">
+                                        <span class="form-check-label">Active</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                        <div class="modal-footer"><button type="button" class="btn btn-secondary" wire:click="$set('showForm', false)">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Save Medicine</button></div>
+                        <div class="modal-footer cc-med-modal-footer">
+                            <button type="button" class="btn btn-secondary cc-med-btn-cancel" wire:click="$set('showForm', false)">Cancel</button>
+                            <button type="submit" class="btn btn-primary cc-med-btn-save">Save Medicine</button>
+                        </div>
                     </form>
                 </div>
             </div>

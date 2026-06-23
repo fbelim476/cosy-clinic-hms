@@ -9,6 +9,7 @@ use App\Services\NumberGeneratorService;
 use App\Services\PatientService;
 use App\Services\PharmacyService;
 use Illuminate\Support\ServiceProvider;
+// use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //
+        // if (app()->environment('local')) {
+        //     URL::forceScheme('https');
+        // }
     }
 }

@@ -164,7 +164,7 @@ new class extends Component
 };
 ?>
 
-<div>
+<div class="cc-patient-register">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
         <h2 class="h3 fw-bold mb-0">Patient Registration</h2>
         <div class="btn-group">
@@ -211,15 +211,15 @@ new class extends Component
                     <div class="premium-card p-4" wire:transition>
                         <h4 class="mb-3">Patient Information</h4>
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <label class="form-label required">Full Name</label>
                                 <input type="text" wire:model.blur="name" class="form-control form-control-lg" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-12 col-md-3">
                                 <label class="form-label required">Mobile</label>
                                 <input type="text" wire:model.live.debounce.500ms="mobile" class="form-control form-control-lg">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-12 col-md-3">
                                 <label class="form-label">Gender</label>
                                 <select wire:model="gender" class="form-select form-select-lg">
                                     <option value="male">Male</option>
@@ -227,21 +227,21 @@ new class extends Component
                                     <option value="other">Other</option>
                                 </select>
                             </div>
-                            <div class="col-md-2"><label class="form-label">Age</label><input type="number" wire:model="age" class="form-control"></div>
-                            <div class="col-md-3"><label class="form-label">Department</label>
+                            <div class="col-12 col-md-2"><label class="form-label">Age</label><input type="number" wire:model="age" class="form-control"></div>
+                            <div class="col-12 col-md-3"><label class="form-label">Department</label>
                                 <select wire:model="department_id" class="form-select">
                                     <option value="">Select</option>
                                     @foreach($departments as $d)<option value="{{ $d->id }}">{{ $d->name }}</option>@endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4"><label class="form-label">Doctor</label>
+                            <div class="col-12 col-md-4"><label class="form-label">Doctor</label>
                                 <select wire:model="doctor_id" class="form-select">
                                     <option value="">Any</option>
                                     @foreach($doctors as $doc)<option value="{{ $doc->id }}">Dr. {{ $doc->user->name }}</option>@endforeach
                                 </select>
                             </div>
                         </div>
-                        <div class="text-end mt-3">
+                        <div class="cc-reg-actions text-end mt-3">
                             <button type="button" wire:click="nextStep" class="btn btn-primary btn-lg">Next: Vitals <i class="ti ti-arrow-right"></i></button>
                         </div>
                     </div>
@@ -250,14 +250,14 @@ new class extends Component
                         <h4 class="mb-3">Vitals & Complaint</h4>
                         <div class="row g-3">
                             <div class="col-12"><label class="form-label">Chief Complaint</label><textarea wire:model="chief_complaint" class="form-control" rows="2"></textarea></div>
-                            <div class="col-md-3"><label class="form-label">BP</label><input wire:model="bp" class="form-control" placeholder="120/80"></div>
-                            <div class="col-md-3"><label class="form-label">Sugar</label><input wire:model="sugar_rbs" class="form-control"></div>
-                            <div class="col-md-2"><label class="form-label">Temp</label><input type="number" step="0.1" wire:model="temperature" class="form-control"></div>
-                            <div class="col-md-2"><label class="form-label">SpO2</label><input type="number" wire:model="spo2" class="form-control"></div>
-                            <div class="col-md-2"><label class="form-label">Weight</label><input type="number" wire:model="weight" class="form-control"></div>
+                            <div class="col-12 col-md-3"><label class="form-label">BP</label><input wire:model="bp" class="form-control" placeholder="120/80"></div>
+                            <div class="col-12 col-md-3"><label class="form-label">Sugar</label><input wire:model="sugar_rbs" class="form-control"></div>
+                            <div class="col-12 col-md-2"><label class="form-label">Temp</label><input type="number" step="0.1" wire:model="temperature" class="form-control"></div>
+                            <div class="col-12 col-md-2"><label class="form-label">SpO2</label><input type="number" wire:model="spo2" class="form-control"></div>
+                            <div class="col-12 col-md-2"><label class="form-label">Weight</label><input type="number" wire:model="weight" class="form-control"></div>
                             <div class="col-12"><label class="form-label">Symptoms</label><textarea wire:model="symptoms" class="form-control" rows="2"></textarea></div>
                         </div>
-                        <div class="d-flex justify-content-between mt-3">
+                        <div class="cc-reg-actions d-flex justify-content-between mt-3">
                             <button type="button" wire:click="prevStep" class="btn btn-outline-secondary">Back</button>
                             <button type="button" wire:click="nextStep" class="btn btn-primary btn-lg">Review & Register</button>
                         </div>
@@ -271,7 +271,7 @@ new class extends Component
                             <div class="col-6"><strong>Priority:</strong> <span class="badge {{ $priority==='emergency'?'bg-danger':'bg-secondary' }}">{{ ucfirst($priority) }}</span></div>
                             <div class="col-12"><strong>Complaint:</strong> {{ $chief_complaint ?: '—' }}</div>
                         </div>
-                        <div class="d-flex justify-content-between mt-4">
+                        <div class="cc-reg-actions d-flex justify-content-between mt-4">
                             <button type="button" wire:click="prevStep" class="btn btn-outline-secondary">Back</button>
                             <button type="submit" class="btn btn-success btn-lg" wire:loading.attr="disabled">
                                 <span wire:loading.remove><i class="ti ti-check"></i> Register & Print Token</span>

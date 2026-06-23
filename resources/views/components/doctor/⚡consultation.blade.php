@@ -228,39 +228,104 @@ new class extends Component
                 </div>
                 @else
                 <div class="premium-card p-4">
-                        <div class="row g-2 mb-3">
-                            <div class="col-md-5">
-                                <input type="text" wire:model.live.debounce.300ms="medicineSearch" class="form-control" placeholder="Search medicines by name, SKU...">
-                                @if($medicineSearch && $medicineList->count())
-                                    <div class="list-group mt-1 shadow-sm" style="max-height:160px;overflow:auto">
-                                        @foreach($medicineList as $m)
-                                            <button type="button" class="list-group-item list-group-item-action py-2 small d-flex justify-content-between"
-                                                    wire:click="pickMedicine({{ $m->id }})">
-                                                <span><strong>{{ $m->name }}</strong><br><code>{{ $m->sku }}</code></span>
-                                                <span class="text-primary fw-bold">₹{{ $m->selling_price }} · {{ $m->gst_percent }}% GST</span>
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                @endif
-                                <input wire:model="med_name" class="form-control mt-2" placeholder="Medicine name">
-                                @if($selected_medicine_id)
-                                    <div class="small mt-2 p-2 rounded bg-success-lt">
-                                        <strong>₹{{ number_format($med_unit_price, 2) }}</strong> · GST {{ $med_gst }}%
-                                        · SKU {{ $med_sku ?? '—' }} · Stock {{ $med_stock }}
-                                    </div>
-                                @endif
+                        <div class="rx-med-entry">
+                            <div class="rx-med-entry-head">
+                                <span class="rx-med-entry-icon"><i class="ti ti-pill"></i></span>
+                                <div>
+                                    <div class="rx-med-entry-title">Add Medicine to Prescription</div>
+                                    <div class="rx-med-entry-sub">Search, set dosage & schedule, then add to the list below</div>
+                                </div>
                             </div>
-                            <div class="col-md-2"><input wire:model="med_dosage" class="form-control" placeholder="Dosage"></div>
-                            <div class="col-md-1"><input type="number" wire:model="med_qty" min="1" class="form-control" placeholder="Qty"></div>
-                            <div class="col-md-1"><input type="number" wire:model="med_days" min="1" class="form-control" placeholder="Days"></div>
-                            <div class="col-md-1"><label class="form-check"><input type="checkbox" wire:model="med_morning" class="form-check-input">M</label></div>
-                            <div class="col-md-1"><label class="form-check"><input type="checkbox" wire:model="med_afternoon" class="form-check-input">A</label></div>
-                            <div class="col-md-1"><label class="form-check"><input type="checkbox" wire:model="med_night" class="form-check-input">N</label></div>
+
+                            <div class="row g-3 align-items-end rx-med-entry-row">
+                                <div class="col-12 col-lg-4">
+                                    <label class="rx-field-label">Medicine</label>
+                                    <input type="text" wire:model.live.debounce.300ms="medicineSearch" class="form-control rx-field" placeholder="Search medicines by name, SKU...">
+                                    @if($medicineSearch && $medicineList->count())
+                                        <div class="list-group mt-2 shadow-sm rounded-3 overflow-hidden" style="max-height:160px;overflow:auto">
+                                            @foreach($medicineList as $m)
+                                                <button type="button" class="list-group-item list-group-item-action py-2 small d-flex justify-content-between"
+                                                        wire:click="pickMedicine({{ $m->id }})">
+                                                    <span><strong>{{ $m->name }}</strong><br><code>{{ $m->sku }}</code></span>
+                                                    <span class="text-primary fw-bold">₹{{ $m->selling_price }} · {{ $m->gst_percent }}% GST</span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    <input wire:model="med_name" class="form-control rx-field mt-2" placeholder="Medicine name">
+                                    @if($selected_medicine_id)
+                                        <div class="rx-med-selected small mt-2">
+                                            <strong>₹{{ number_format($med_unit_price, 2) }}</strong> · GST {{ $med_gst }}%
+                                            · SKU {{ $med_sku ?? '—' }} · Stock {{ $med_stock }}
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="col-6 col-md-4 col-lg-2">
+                                    <label class="rx-field-label">Dosage</label>
+                                    <input wire:model="med_dosage" class="form-control rx-field" placeholder="e.g. 1-0-1">
+                                </div>
+
+                                <div class="col-6 col-md-4 col-lg-2">
+                                    <label class="rx-field-label d-flex align-items-center gap-1">
+                                        Qty Per Dose
+                                        <span class="rx-info-tip" tabindex="0" aria-label="Help">
+                                            <i class="ti ti-info-circle"></i>
+                                            <span class="rx-tip-card">Number of tablets/capsules to take each time.</span>
+                                        </span>
+                                    </label>
+                                    <input type="number" wire:model="med_qty" min="1" class="form-control rx-field">
+                                </div>
+
+                                <div class="col-6 col-md-4 col-lg-2">
+                                    <label class="rx-field-label d-flex align-items-center gap-1">
+                                        Days
+                                        <span class="rx-info-tip" tabindex="0" aria-label="Help">
+                                            <i class="ti ti-info-circle"></i>
+                                            <span class="rx-tip-card">Number of days medicine should be continued.</span>
+                                        </span>
+                                    </label>
+                                    <input type="number" wire:model="med_days" min="1" class="form-control rx-field">
+                                </div>
+
+                                <div class="col-12 col-lg-7 col-xl-6">
+                                    <label class="rx-field-label">Schedule</label>
+                                    <div class="rx-schedule-row">
+                                        <div class="rx-schedule-group">
+                                            <label class="rx-schedule-check">
+                                                <input type="checkbox" wire:model="med_morning" class="form-check-input">
+                                                <span class="rx-schedule-text">Morning</span>
+                                                <span class="rx-info-tip" tabindex="0" aria-label="Help">
+                                                    <i class="ti ti-info-circle"></i>
+                                                    <span class="rx-tip-card">Take medicine in the morning.</span>
+                                                </span>
+                                            </label>
+                                            <label class="rx-schedule-check">
+                                                <input type="checkbox" wire:model="med_afternoon" class="form-check-input">
+                                                <span class="rx-schedule-text">Afternoon</span>
+                                                <span class="rx-info-tip" tabindex="0" aria-label="Help">
+                                                    <i class="ti ti-info-circle"></i>
+                                                    <span class="rx-tip-card">Take medicine in the afternoon.</span>
+                                                </span>
+                                            </label>
+                                            <label class="rx-schedule-check">
+                                                <input type="checkbox" wire:model="med_night" class="form-check-input">
+                                                <span class="rx-schedule-text">Night</span>
+                                                <span class="rx-info-tip" tabindex="0" aria-label="Help">
+                                                    <i class="ti ti-info-circle"></i>
+                                                    <span class="rx-tip-card">Take medicine at night.</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <button type="button" wire:click="addMedicine" class="btn btn-primary rx-btn-add-med">
+                                            <i class="ti ti-plus"></i> Add Medicine
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-end mb-2">
-                            <button type="button" wire:click="addMedicine" class="btn btn-primary btn-sm"><i class="ti ti-plus"></i> Add Medicine</button>
-                        </div>
-                        <table class="table table-sm table-hover">
+
+                        <table class="table table-sm table-hover mt-3">
                             <thead class="table-light"><tr><th>Medicine</th><th>SKU</th><th>Price</th><th>GST</th><th>Qty</th><th>Schedule</th><th></th></tr></thead>
                             <tbody>
                                 @foreach($medicines as $i => $med)

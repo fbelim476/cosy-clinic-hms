@@ -74,14 +74,20 @@ new class extends Component
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 dw-panels-row">
         <div class="col-lg-5">
-            <div class="premium-card h-100">
-                <div class="card-header border-0 d-flex justify-content-between align-items-center">
-                    <h3 class="card-title mb-0"><i class="ti ti-users me-2"></i>Patient Queue</h3>
-                    <span class="badge bg-primary-lt">{{ $waiting->count() }}</span>
+            <div class="premium-card h-100 dw-panel">
+                <div class="cc-card-header dw-panel-header">
+                    <div class="dw-panel-heading">
+                        <span class="dw-panel-icon dw-panel-icon-primary"><i class="ti ti-users"></i></span>
+                        <div class="dw-panel-titles">
+                            <h3 class="dw-panel-title">Patient Queue</h3>
+                            <p class="dw-panel-subtitle">Waiting for consultation today</p>
+                        </div>
+                    </div>
+                    <span class="badge bg-primary-lt dw-panel-badge">{{ $waiting->count() }}</span>
                 </div>
-                <div class="p-2" style="max-height:68vh;overflow-y:auto">
+                <div class="dw-panel-body">
                     @forelse($waiting as $v)
                         <div class="dw-queue-item {{ $v->isEmergency() ? 'border-danger' : '' }}" wire:key="w-{{ $v->id }}">
                             <div class="d-flex justify-content-between align-items-start gap-2">
@@ -112,12 +118,19 @@ new class extends Component
             </div>
         </div>
 
-        <div class="col-lg-7">
-            <div class="premium-card mb-3">
-                <div class="card-header border-0">
-                    <h4 class="card-title mb-0"><i class="ti ti-stethoscope text-warning me-2"></i>Active Consultations</h4>
+        <div class="col-lg-7 d-flex flex-column gap-3">
+            <div class="premium-card dw-panel flex-fill">
+                <div class="cc-card-header dw-panel-header">
+                    <div class="dw-panel-heading">
+                        <span class="dw-panel-icon dw-panel-icon-warning"><i class="ti ti-stethoscope"></i></span>
+                        <div class="dw-panel-titles">
+                            <h3 class="dw-panel-title">Active Consultations</h3>
+                            <p class="dw-panel-subtitle">Patients you are currently seeing</p>
+                        </div>
+                    </div>
+                    <span class="badge bg-warning-lt dw-panel-badge">{{ $consulting->count() }}</span>
                 </div>
-                <div class="card-body pt-0">
+                <div class="dw-panel-body dw-panel-body-compact">
                     @forelse($consulting as $v)
                         <a href="{{ route('doctor.consult', $v) }}" class="btn btn-warning btn-lg w-100 mb-2 d-flex justify-content-between align-items-center">
                             <span><i class="ti ti-arrow-right me-2"></i>{{ $v->patient->name }}</span>
@@ -131,13 +144,23 @@ new class extends Component
                     @endforelse
                 </div>
             </div>
-            <div class="premium-card p-4">
-                <h5 class="fw-bold mb-3"><i class="ti ti-bulb text-primary me-2"></i>Quick Tips</h5>
-                <ul class="small text-muted mb-0 ps-3">
-                    <li><kbd>Ctrl+S</kbd> Save consultation on consult screen</li>
-                    <li>Queue updates automatically via WebSocket</li>
-                    <li>Emergency patients appear at the top</li>
-                </ul>
+            <div class="premium-card dw-panel">
+                <div class="cc-card-header dw-panel-header dw-panel-header-tips">
+                    <div class="dw-panel-heading">
+                        <span class="dw-panel-icon dw-panel-icon-info"><i class="ti ti-bulb"></i></span>
+                        <div class="dw-panel-titles">
+                            <h3 class="dw-panel-title">Quick Tips</h3>
+                            <p class="dw-panel-subtitle">Shortcuts &amp; workflow hints</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dw-panel-body dw-panel-body-tips">
+                    <ul class="dw-tips-list mb-0">
+                        <li><kbd>Ctrl+S</kbd> Save consultation on consult screen</li>
+                        <li>Queue updates automatically via WebSocket</li>
+                        <li>Emergency patients appear at the top</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
