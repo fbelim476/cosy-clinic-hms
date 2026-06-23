@@ -16,7 +16,7 @@ class PatientVisit extends Model
 
     protected $fillable = [
         'visit_number', 'patient_id', 'branch_id', 'department_id', 'doctor_id',
-        'receptionist_id', 'token_number', 'queue_number', 'visit_type', 'priority',
+        'receptionist_id', 'token_number', 'token_code', 'queue_number', 'visit_type', 'priority',
         'status', 'weight', 'height', 'bp', 'sugar_rbs', 'temperature', 'spo2',
         'symptoms', 'chief_complaint', 'referred_by', 'notes',
         'registered_at', 'sent_to_doctor_at', 'consultation_started_at',
@@ -84,5 +84,14 @@ class PatientVisit extends Model
     public function isEmergency(): bool
     {
         return $this->priority === VisitPriority::Emergency;
+    }
+
+    public function displayToken(): string
+    {
+        if ($this->token_code) {
+            return $this->token_code;
+        }
+
+        return $this->token_number ? '#'.$this->token_number : '—';
     }
 }

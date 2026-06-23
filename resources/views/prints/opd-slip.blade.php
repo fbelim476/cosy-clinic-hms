@@ -1,6 +1,6 @@
 @extends('layouts.print')
 
-@section('title', 'OPD Slip #' . $visit->token_number)
+@section('title', 'OPD Slip ' . $visit->displayToken())
 
 @push('print-styles')
 <style>
@@ -8,6 +8,18 @@
     @media print {
         html, body { width: 80mm; max-width: 80mm; margin: 0; padding: 0; }
         .no-print { display: none !important; }
+        .opd-token {
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            background-clip: unset !important;
+            -webkit-text-fill-color: #0284c7 !important;
+            color: #0284c7 !important;
+            font-size: 44px !important;
+        }
+        .opd-token.emergency {
+            -webkit-text-fill-color: #dc2626 !important;
+            color: #dc2626 !important;
+        }
     }
     * { box-sizing: border-box; }
     body.opd-slip {
@@ -99,7 +111,7 @@
 
     <div class="opd-token-wrap">
         <div class="opd-token-label">YOUR TOKEN</div>
-        <div class="opd-token {{ $visit->isEmergency() ? 'emergency' : '' }}">#{{ $visit->token_number }}</div>
+        <div class="opd-token {{ $visit->isEmergency() ? 'emergency' : '' }}">{{ $visit->displayToken() }}</div>
     </div>
 
     <table class="opd-meta">
@@ -109,7 +121,7 @@
         <tr><td>Mobile</td><td>{{ $visit->patient->mobile }}</td></tr>
         <tr><td>Age / Sex</td><td>{{ $visit->patient->age ?? '—' }} / {{ ucfirst($visit->patient->gender ?? '-') }}</td></tr>
         <tr><td>Department</td><td>{{ $visit->department?->name ?? 'General OPD' }}</td></tr>
-        <tr><td>Doctor</td><td>{{ $visit->doctor ? 'Dr. '.$visit->doctor->user->name : 'As assigned' }}</td></tr>
+        <tr><td>Doctor</td><td>{{ $visit->doctor ? (str_starts_with($visit->doctor->user->name, 'Dr.') ? $visit->doctor->user->name : 'Dr. '.$visit->doctor->user->name) : 'As assigned' }}</td></tr>
         @if($visit->chief_complaint)
             <tr><td>Complaint</td><td>{{ $visit->chief_complaint }}</td></tr>
         @endif

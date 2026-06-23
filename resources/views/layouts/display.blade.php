@@ -31,15 +31,20 @@
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
     <script src="{{ url('js/hms-realtime.js') }}"></script>
 </head>
-<body class="token-display-screen">
+<body class="token-display-screen td-theme-night" id="tdBody">
     <header class="td-header">
         <div>
             <div class="td-brand"><i class="ti ti-building-hospital"></i> CosyClinic OPD</div>
             <div class="td-clock" id="tdClock">{{ now()->format('l, d F Y — h:i A') }}</div>
         </div>
-        <div class="td-live-badge">
-            <span class="td-live-dot" aria-hidden="true"></span>
-            Live Queue
+        <div class="td-header-actions">
+            <button type="button" class="td-theme-btn" id="tdThemeBtn" title="Toggle Day / Night mode" aria-label="Toggle theme">
+                <i class="ti ti-moon" id="tdThemeIcon"></i>
+            </button>
+            <div class="td-live-badge">
+                <span class="td-live-dot" aria-hidden="true"></span>
+                Live Queue
+            </div>
         </div>
     </header>
 
@@ -54,6 +59,34 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             window.initHmsRealtime?.(0);
+
+            const body = document.getElementById('tdBody');
+            const btn = document.getElementById('tdThemeBtn');
+            const icon = document.getElementById('tdThemeIcon');
+            const STORAGE_KEY = 'cc-token-display-theme';
+
+            const applyTheme = (theme) => {
+                body.classList.remove('td-theme-day', 'td-theme-night');
+                body.classList.add(theme === 'day' ? 'td-theme-day' : 'td-theme-night');
+                if (icon) {
+                    icon.className = theme === 'day' ? 'ti ti-sun' : 'ti ti-moon';
+                }
+                localStorage.setItem(STORAGE_KEY, theme);
+            };
+
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === 'day' || saved === 'night') {
+                applyTheme(saved);
+            } else {
+                const hour = new Date().getHours();
+                applyTheme(hour >= 7 && hour < 19 ? 'day' : 'night');
+            }
+
+            btn?.addEventListener('click', () => {
+                const isDay = body.classList.contains('td-theme-day');
+                applyTheme(isDay ? 'night' : 'day');
+            });
+
             const tick = () => {
                 const el = document.getElementById('tdClock');
                 if (!el) return;

@@ -156,7 +156,7 @@ new class extends Component
         <div>
             <h1 class="cc-page-title mb-1">{{ $visit->patient->name }}</h1>
             <p class="cc-page-subtitle mb-0">
-                <span class="badge bg-primary">Token #{{ $visit->token_number }}</span>
+                <span class="badge bg-primary">Token {{ $visit->displayToken() }}</span>
                 <span class="badge bg-secondary-lt ms-1">{{ $visit->patient->patient_id }}</span>
                 @if($visit->isEmergency())<span class="badge bg-danger badge-emergency ms-1">EMERGENCY</span>@endif
             </p>

@@ -27,6 +27,7 @@ class ConsultationService
         $consultation = DoctorConsultation::create([
             'patient_visit_id' => $visit->id,
             'doctor_id' => $doctor->id,
+            'consultation_charge' => $doctor->consultation_fee,
             'status' => 'in_progress',
             'started_at' => now(),
         ]);
@@ -35,7 +36,7 @@ class ConsultationService
         RealtimeService::queueUpdated(
             'consultation_started',
             $visit,
-            "Dr. consulting Token #{$visit->token_number}"
+            "Dr. consulting Token {$visit->displayToken()}"
         );
 
         return $consultation;
@@ -97,7 +98,7 @@ class ConsultationService
         RealtimeService::queueUpdated(
             'sent_to_pharmacy',
             $visit,
-            "Token #{$visit->token_number} ready at pharmacy"
+            "Token {$visit->displayToken()} ready at pharmacy"
         );
 
         return $visit;

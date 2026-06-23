@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\VisitStatus;
+use App\Models\Doctor;
 use App\Models\PatientVisit;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -12,64 +13,99 @@ new class extends Component
 
     public function with(): array
     {
-        return [
-            'current' => PatientVisit::with('patient')
+        $doctors = Doctor::with(['user', 'department'])
+            ->where('is_available', true)
+            ->orderBy('department_id')
+            ->get();
+
+        $panels = $doctors->map(function (Doctor $doctor) {
+            $base = PatientVisit::where('doctor_id', $doctor->id)->whereDate('created_at', today());
+
+            $current = (clone $base)
                 ->where('status', VisitStatus::WithDoctor)
-                ->whereDate('created_at', today())
-                ->latest('consultation_started_at')->first(),
-            'next' => PatientVisit::with('patient')
+                ->latest('consultation_started_at')
+                ->with('patient')
+                ->first();
+
+            $nextWaiting = (clone $base)
                 ->where('status', VisitStatus::Waiting)
-                ->whereDate('created_at', today())
+                ->with('patient')
                 ->orderByRaw("CASE WHEN priority = 'emergency' THEN 0 ELSE 1 END")
-                ->orderBy('token_number')->limit(8)->get(),
-            'waitingCount' => PatientVisit::where('status', VisitStatus::Waiting)->whereDate('created_at', today())->count(),
+                ->orderBy('token_number')
+                ->first();
+
+            $docName = $doctor->user->name;
+
+            return [
+                'doctor' => $doctor,
+                'doctor_name' => str_starts_with($docName, 'Dr.') ? $docName : 'Dr. '.$docName,
+                'current' => $current,
+                'current_token' => $current?->displayToken() ?? '—',
+                'current_patient' => $current?->patient?->name ?? 'Please wait',
+                'is_emergency' => $current?->isEmergency() ?? false,
+                'waiting' => (clone $base)->where('status', VisitStatus::Waiting)->count(),
+                'next_token' => $nextWaiting?->displayToken(),
+                'next_patient' => $nextWaiting?->patient?->name,
+            ];
+        });
+
+        return [
+            'panels' => $panels,
+            'panelCount' => max($panels->count(), 1),
         ];
     }
 };
 ?>
 
 <div
-    wire:poll.3s
-    class="token-display-body"
+    wire:poll.5s
+    class="token-display-body td-multi-body"
     x-data
     x-init="if (window.Echo) { Echo.channel('CosyClinic-queue').listen('.visit-queue-updated', () => $wire.$refresh()) }"
 >
-    <div class="td-layout">
-        {{-- NOW SERVING --}}
-        <section class="td-now-panel" aria-label="Now serving">
-            <div class="td-now-label">Now Serving</div>
-            <div class="td-token" wire:key="current-token-{{ $current?->id ?? 0 }}">
-                {{ $current?->token_number ?? '—' }}
-            </div>
-            <div class="td-patient" wire:key="current-name-{{ $current?->id ?? 0 }}">
-                {{ $current?->patient?->name ?? 'Please wait' }}
-            </div>
-            @if($current?->isEmergency())
-                <span class="td-emergency-badge" wire:key="current-er-{{ $current->id }}">Emergency</span>
-            @endif
-        </section>
+    <div class="td-multi-grid" data-count="{{ $panelCount }}">
+        @forelse($panels as $panel)
+            <section
+                class="td-doctor-panel {{ $panel['is_emergency'] ? 'td-panel-emergency' : '' }} {{ $panel['current'] ? 'td-panel-active' : 'td-panel-idle' }}"
+                wire:key="td-doc-{{ $panel['doctor']->id }}"
+            >
+                <div class="td-panel-top">
+                    <div class="td-doctor-avatar"><i class="ti ti-stethoscope"></i></div>
+                    <div class="td-panel-meta">
+                        <div class="td-doctor-name">{{ $panel['doctor_name'] }}</div>
+                        <div class="td-doctor-dept">{{ $panel['doctor']->department?->name ?? 'OPD' }}</div>
+                        @if($panel['doctor']->room_number)
+                            <div class="td-doctor-room"><i class="ti ti-door"></i> Room {{ $panel['doctor']->room_number }}</div>
+                        @endif
+                    </div>
+                </div>
 
-        {{-- UP NEXT --}}
-        <aside class="td-next-panel" aria-label="Up next">
-            <div class="td-next-title">
-                Up Next — <span class="td-next-count">{{ $waitingCount }}</span> waiting
-            </div>
-            <div class="td-next-grid">
-                @forelse($next as $v)
-                    <div
-                        class="td-next {{ $v->isEmergency() ? 'emergency' : '' }}"
-                        wire:key="next-{{ $v->id }}"
-                    >
-                        <div class="td-next-num">#{{ $v->token_number }}</div>
-                        <div class="td-next-name">{{ $v->patient->name }}</div>
+                <div class="td-doctor-label">Now Serving</div>
+                <div class="td-doctor-token" wire:key="token-{{ $panel['doctor']->id }}-{{ $panel['current_token'] }}">
+                    {{ $panel['current_token'] }}
+                </div>
+                <div class="td-doctor-patient">{{ $panel['current_patient'] }}</div>
+
+                <div class="td-panel-footer">
+                    <div class="td-doctor-waiting">
+                        <span class="td-wait-label">Waiting</span>
+                        <strong>{{ $panel['waiting'] }}</strong>
                     </div>
-                @empty
-                    <div class="td-next td-next-empty">
-                        <div class="td-next-num">—</div>
-                        <div class="td-next-name">No patients in queue</div>
-                    </div>
-                @endforelse
-            </div>
-        </aside>
+                    @if($panel['next_token'])
+                        <div class="td-next-inline">
+                            <span class="td-next-inline-label">Up Next</span>
+                            <span class="td-next-inline-token">{{ $panel['next_token'] }}</span>
+                            <span class="td-next-inline-name">{{ $panel['next_patient'] }}</span>
+                        </div>
+                    @endif
+                </div>
+            </section>
+        @empty
+            <section class="td-doctor-panel td-doctor-panel-empty">
+                <div class="td-doctor-label">No active doctors</div>
+                <div class="td-doctor-token">—</div>
+                <p class="td-idle-msg">Configure doctors in Admin panel</p>
+            </section>
+        @endforelse
     </div>
 </div>

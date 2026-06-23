@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\VisitPriority;
 use App\Enums\VisitStatus;
+use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\PatientVisit;
 use App\Repositories\PatientRepository;
@@ -35,10 +36,19 @@ class PatientService
                 ? $this->patients->findOrFail($patientData['id'])
                 : $this->createPatient($patientData);
 
-            $tokenNumber = $this->numbers->nextToken(
-                $visitData['branch_id'] ?? null,
-                $visitData['department_id'] ?? null
-            );
+            $doctor = isset($visitData['doctor_id']) ? Doctor::find($visitData['doctor_id']) : null;
+
+            if ($doctor) {
+                $token = $this->numbers->nextDoctorToken($doctor);
+                $tokenNumber = $token['number'];
+                $tokenCode = $token['code'];
+            } else {
+                $tokenNumber = $this->numbers->nextToken(
+                    $visitData['branch_id'] ?? null,
+                    $visitData['department_id'] ?? null
+                );
+                $tokenCode = null;
+            }
 
             $visit = PatientVisit::create([
                 'visit_number' => $this->numbers->visitNumber(),
@@ -48,6 +58,7 @@ class PatientService
                 'doctor_id' => $visitData['doctor_id'] ?? null,
                 'receptionist_id' => $receptionistId,
                 'token_number' => $tokenNumber,
+                'token_code' => $tokenCode,
                 'queue_number' => $tokenNumber,
                 'visit_type' => $visitData['visit_type'] ?? 'opd',
                 'priority' => $visitData['priority'] ?? VisitPriority::Normal,
@@ -71,7 +82,7 @@ class PatientService
             RealtimeService::queueUpdated(
                 'patient_registered',
                 $visit,
-                "New patient {$visit->patient->name} — Token #{$visit->token_number}"
+                "New patient {$visit->patient->name} — Token {$visit->displayToken()}"
             );
 
             return $visit;
@@ -91,7 +102,7 @@ class PatientService
         RealtimeService::queueUpdated(
             'sent_to_doctor',
             $visit,
-            "Token #{$visit->token_number} — {$visit->patient->name} sent to doctor"
+            "Token {$visit->displayToken()} — {$visit->patient->name} sent to doctor"
         );
 
         return $visit;

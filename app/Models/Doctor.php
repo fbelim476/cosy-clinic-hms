@@ -12,8 +12,10 @@ class Doctor extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'department_id', 'registration_number',
-        'specialization', 'consultation_fee', 'is_available',
+        'user_id', 'branch_id', 'department_id', 'token_prefix',
+        'registration_number', 'specialization', 'qualification',
+        'consultation_fee', 'room_number', 'daily_queue_limit',
+        'profile_photo_path', 'is_available',
     ];
 
     protected function casts(): array
@@ -29,6 +31,11 @@ class Doctor extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
@@ -42,5 +49,20 @@ class Doctor extends Model
     public function consultations(): HasMany
     {
         return $this->hasMany(DoctorConsultation::class);
+    }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(DoctorSchedule::class);
+    }
+
+    public function displayName(): string
+    {
+        return $this->user?->name ?? 'Doctor';
     }
 }

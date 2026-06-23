@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\PatientVisit;
 use Illuminate\Support\Facades\DB;
@@ -44,5 +45,19 @@ class NumberGeneratorService
         }
 
         return (int) $query->max('token_number') + 1;
+    }
+
+    public function nextDoctorToken(Doctor $doctor): array
+    {
+        $next = (int) PatientVisit::where('doctor_id', $doctor->id)
+            ->whereDate('created_at', today())
+            ->max('token_number') + 1;
+
+        $prefix = strtoupper($doctor->token_prefix ?: $doctor->department?->code ?: 'TKN');
+
+        return [
+            'number' => $next,
+            'code' => $prefix . '-' . str_pad((string) $next, 3, '0', STR_PAD_LEFT),
+        ];
     }
 }

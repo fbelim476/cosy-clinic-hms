@@ -249,7 +249,7 @@ new class extends Component
                                     class="list-group-item list-group-item-action py-3 border-0 {{ $activeOrder && $activeOrder->patient_visit_id === $v->id ? 'active' : '' }}">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <span class="queue-token" style="font-size:1.6rem">#{{ $v->token_number }}</span>
+                                        <span class="queue-token" style="font-size:1.6rem">{{ $v->displayToken() }}</span>
                                         @if($v->isEmergency())<span class="badge bg-danger badge-emergency ms-1">ER</span>@endif
                                         <div class="fw-bold mt-1">{{ $v->patient->name }}</div>
                                         <div class="small text-muted">{{ $v->patient->mobile }}</div>
@@ -282,7 +282,7 @@ new class extends Component
                             <div class="card-header d-flex flex-wrap gap-2 align-items-center justify-content-between border-0">
                                 <div>
                                     <h4 class="mb-0">{{ $activeOrder->patientVisit->patient->name }}</h4>
-                                    <small class="text-muted">Token #{{ $activeOrder->patientVisit->token_number }} · {{ $activeOrder->patientVisit->patient->mobile }}</small>
+                                    <small class="text-muted">Token {{ $activeOrder->patientVisit->displayToken() }} · {{ $activeOrder->patientVisit->patient->mobile }}</small>
                                 </div>
                                 <div class="d-flex gap-2 flex-grow-1" style="max-width:420px">
                                     <div class="input-group flex-grow-1">

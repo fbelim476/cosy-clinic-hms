@@ -7,6 +7,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\MedicineController;
+use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\SettingController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:super-admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', fn () => view('pages.admin.dashboard'))->name('dashboard');
         Route::get('/users', [UserController::class, 'index'])->name('users');
+        Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors');
         Route::get('/medicines', [MedicineController::class, 'index'])->name('medicines');
         Route::post('/medicines', [MedicineController::class, 'store'])->name('medicines.store');
         Route::get('/medicines/export', [MedicineController::class, 'export'])->name('medicines.export');
@@ -45,10 +47,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/register', fn () => view('pages.reception.register'))->name('register');
         Route::get('/patients', [PatientController::class, 'index'])->name('patients');
         Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
+        Route::get('/appointments', fn () => view('pages.reception.appointments'))->name('appointments');
     });
 
     Route::middleware('role:doctor,super-admin')->prefix('doctor')->name('doctor.')->group(function () {
         Route::get('/dashboard', fn () => view('pages.doctor.dashboard'))->name('dashboard');
+        Route::get('/reports', fn () => view('pages.doctor.reports'))->name('reports');
         Route::get('/consult/{visit}', fn (\App\Models\PatientVisit $visit) => view('pages.doctor.consult', compact('visit')))->name('consult');
     });
 

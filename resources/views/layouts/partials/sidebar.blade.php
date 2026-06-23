@@ -17,6 +17,9 @@
             <a href="{{ route('admin.users') }}" data-tooltip="Users" class="cc-nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }}">
                 <i class="ti ti-users"></i><span class="cc-nav-label">Users</span>
             </a>
+            <a href="{{ route('admin.doctors') }}" data-tooltip="Doctors" class="cc-nav-link {{ request()->routeIs('admin.doctors*') ? 'active' : '' }}">
+                <i class="ti ti-stethoscope"></i><span class="cc-nav-label">Doctors</span>
+            </a>
             <a href="{{ route('admin.medicines') }}" data-tooltip="Medicines" class="cc-nav-link {{ request()->routeIs('admin.medicines*') ? 'active' : '' }}">
                 <i class="ti ti-pill"></i><span class="cc-nav-label">Medicines</span>
             </a>
@@ -36,12 +39,18 @@
             <a href="{{ route('reception.patients') }}" data-tooltip="Patients" class="cc-nav-link {{ request()->routeIs('reception.patients*') ? 'active' : '' }}">
                 <i class="ti ti-search"></i><span class="cc-nav-label">Patients</span>
             </a>
+            <a href="{{ route('reception.appointments') }}" data-tooltip="Appointments" class="cc-nav-link {{ request()->routeIs('reception.appointments') ? 'active' : '' }}">
+                <i class="ti ti-calendar"></i><span class="cc-nav-label">Appointments</span>
+            </a>
         @endif
 
         @if(in_array($role, ['doctor', 'super-admin']))
             <div class="cc-nav-section">Clinical</div>
-            <a href="{{ route('doctor.dashboard') }}" data-tooltip="Consultation" class="cc-nav-link {{ request()->routeIs('doctor.*') ? 'active' : '' }}">
+            <a href="{{ route('doctor.dashboard') }}" data-tooltip="Consultation" class="cc-nav-link {{ request()->routeIs('doctor.dashboard') || request()->routeIs('doctor.consult') ? 'active' : '' }}">
                 <i class="ti ti-stethoscope"></i><span class="cc-nav-label">Consultation</span>
+            </a>
+            <a href="{{ route('doctor.reports') }}" data-tooltip="Reports" class="cc-nav-link {{ request()->routeIs('doctor.reports') ? 'active' : '' }}">
+                <i class="ti ti-chart-bar"></i><span class="cc-nav-label">My Reports</span>
             </a>
         @endif
 

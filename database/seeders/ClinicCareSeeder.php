@@ -28,7 +28,7 @@ class CosyClinicSeeder extends Seeder
             'pharmacy.view', 'pharmacy.dispense', 'pharmacy.inventory',
             'billing.view', 'billing.create', 'billing.payment',
             'lab.view', 'lab.process', 'lab.upload',
-            'medicines.manage', 'users.manage', 'settings.manage',
+            'medicines.manage', 'users.manage', 'doctors.manage', 'settings.manage',
             'reports.view', 'audit.view',
         ];
 
@@ -66,20 +66,38 @@ class CosyClinicSeeder extends Seeder
             ]
         );
 
-        $dept = Department::firstOrCreate(
+        $deptGen = Department::firstOrCreate(
             ['code' => 'GEN', 'branch_id' => $branch->id],
             ['name' => 'General OPD', 'description' => 'General Out Patient Department']
         );
 
-        Department::firstOrCreate(
+        $deptPed = Department::firstOrCreate(
             ['code' => 'PED', 'branch_id' => $branch->id],
             ['name' => 'Pediatrics', 'description' => 'Child Care OPD']
         );
 
+        Department::firstOrCreate(
+            ['code' => 'GYN', 'branch_id' => $branch->id],
+            ['name' => 'Gynecology', 'description' => 'Women Health OPD']
+        );
+
+        $dept = $deptGen;
+
         $users = [
             ['name' => 'Super Admin', 'email' => 'admin@CosyClinic.test', 'role' => 'super-admin', 'designation' => 'Administrator'],
             ['name' => 'Reception Desk', 'email' => 'reception@CosyClinic.test', 'role' => 'receptionist', 'designation' => 'Receptionist'],
-            ['name' => 'Dr. Rajesh Kumar', 'email' => 'doctor@CosyClinic.test', 'role' => 'doctor', 'designation' => 'Senior Physician'],
+            ['name' => 'Dr. Rajesh Kumar', 'email' => 'doctor@CosyClinic.test', 'role' => 'doctor', 'designation' => 'Senior Physician', 'doctor' => [
+                'department_id' => $deptGen->id, 'token_prefix' => 'DRR', 'specialization' => 'General Medicine',
+                'qualification' => 'MBBS, MD', 'consultation_fee' => 200, 'room_number' => '101', 'registration_number' => 'MCI-12345',
+            ]],
+            ['name' => 'Dr. Amit Shah', 'email' => 'doctor2@CosyClinic.test', 'role' => 'doctor', 'designation' => 'Pediatrician', 'doctor' => [
+                'department_id' => $deptPed->id, 'token_prefix' => 'PED', 'specialization' => 'Pediatrics',
+                'qualification' => 'MBBS, DCH', 'consultation_fee' => 250, 'room_number' => '102', 'registration_number' => 'MCI-23456',
+            ]],
+            ['name' => 'Dr. Priya Patel', 'email' => 'doctor3@CosyClinic.test', 'role' => 'doctor', 'designation' => 'Gynecologist', 'doctor' => [
+                'department_id' => Department::where('code', 'GYN')->first()?->id, 'token_prefix' => 'GYN', 'specialization' => 'Gynecology',
+                'qualification' => 'MBBS, MS', 'consultation_fee' => 300, 'room_number' => '103', 'registration_number' => 'MCI-34567',
+            ]],
             ['name' => 'Pharmacy Counter', 'email' => 'pharmacy@CosyClinic.test', 'role' => 'pharmacist', 'designation' => 'Pharmacist'],
             ['name' => 'Accounts Desk', 'email' => 'accounts@CosyClinic.test', 'role' => 'accountant', 'designation' => 'Accountant'],
             ['name' => 'Lab Technician', 'email' => 'lab@CosyClinic.test', 'role' => 'lab-technician', 'designation' => 'Lab Technician'],
@@ -101,16 +119,13 @@ class CosyClinicSeeder extends Seeder
             );
             $user->assignRole($u['role']);
 
-            if ($u['role'] === 'doctor') {
+            if ($u['role'] === 'doctor' && isset($u['doctor'])) {
                 Doctor::firstOrCreate(
                     ['user_id' => $user->id],
-                    [
-                        'department_id' => $dept->id,
-                        'registration_number' => 'MCI-12345',
-                        'specialization' => 'General Medicine',
-                        'consultation_fee' => 200,
+                    array_merge($u['doctor'], [
+                        'branch_id' => $branch->id,
                         'is_available' => true,
-                    ]
+                    ])
                 );
             }
         }

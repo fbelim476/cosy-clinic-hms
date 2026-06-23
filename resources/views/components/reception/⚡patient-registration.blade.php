@@ -3,6 +3,7 @@
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Services\DoctorService;
 use App\Services\PatientService;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -47,6 +48,34 @@ new class extends Component
     public ?int $printVisitId = null;
     public bool $showPrintModal = false;
 
+    public function mount(): void
+    {
+        $this->applyDefaultAssignment();
+    }
+
+    protected function applyDefaultAssignment(): void
+    {
+        $branchId = auth()->user()->branch_id ?? 1;
+
+        if (! $this->department_id) {
+            $dept = Department::where('is_active', true)->orderBy('id')->first();
+            $this->department_id = $dept?->id;
+        }
+
+        if ($this->department_id && ! $this->doctor_id) {
+            $this->doctor_id = app(DoctorService::class)
+                ->listActive($this->department_id, $branchId)
+                ->first()?->id;
+        }
+    }
+
+    public function getSelectedDoctorProperty(): ?Doctor
+    {
+        return $this->doctor_id
+            ? Doctor::with('user')->find($this->doctor_id)
+            : null;
+    }
+
     public function updatedSearch(): void
     {
         if (strlen($this->search) < 2) {
@@ -67,6 +96,16 @@ new class extends Component
         }
     }
 
+    public function updatedDepartmentId(): void
+    {
+        $branchId = auth()->user()->branch_id ?? 1;
+        $this->doctor_id = app(DoctorService::class)
+            ->listActive($this->department_id, $branchId)
+            ->first()?->id;
+    }
+
+    public function updatedDoctorId(): void {}
+
     public function selectPatient(int $id): void
     {
         $patient = Patient::findOrFail($id);
@@ -79,7 +118,7 @@ new class extends Component
         $this->search = '';
         $this->searchResults = [];
         $this->duplicateWarning = false;
-        $this->step = 2;
+        $this->applyDefaultAssignment();
     }
 
     public function setMode(string $mode): void
@@ -94,7 +133,12 @@ new class extends Component
     public function nextStep(): void
     {
         if ($this->step === 1) {
-            $this->validate(['name' => 'required|min:2', 'mobile' => 'required|digits_between:10,15']);
+            $this->validate([
+                'name' => 'required|min:2',
+                'mobile' => 'required|digits_between:10,15',
+                'department_id' => 'required|exists:departments,id',
+                'doctor_id' => 'required|exists:doctors,id',
+            ]);
             if ($this->duplicateWarning) return;
         }
         $this->step = min(3, $this->step + 1);
@@ -107,7 +151,13 @@ new class extends Component
 
     public function register(): void
     {
-        $this->validate(['name' => 'required', 'mobile' => 'required', 'gender' => 'required']);
+        $this->validate([
+            'name' => 'required',
+            'mobile' => 'required',
+            'gender' => 'required',
+            'department_id' => 'required|exists:departments,id',
+            'doctor_id' => 'required|exists:doctors,id',
+        ]);
 
         $photoPath = $this->photo ? $this->photo->store('patients', 'public') : null;
 
@@ -132,7 +182,7 @@ new class extends Component
 
         $this->printVisitId = $visit->id;
         $this->showPrintModal = true;
-        $this->dispatch('notify', title: 'Patient Registered Successfully', message: "Token #{$visit->token_number} generated", type: 'success');
+        $this->dispatch('notify', title: 'Patient Registered Successfully', message: "Token {$visit->displayToken()} generated", type: 'success');
         $this->dispatch('open-opd-print', url: route('print.opd-slip', ['visit' => $visit, 'embed' => 1]));
     }
 
@@ -152,13 +202,15 @@ new class extends Component
         $this->gender = 'male';
         $this->visit_type = 'opd';
         $this->priority = 'normal';
+        $this->applyDefaultAssignment();
     }
 
     public function with(): array
     {
         return [
-            'departments' => Department::where('is_active', true)->get(),
-            'doctors' => Doctor::with('user')->where('is_available', true)->get(),
+            'departments' => Department::where('is_active', true)->orderBy('name')->get(),
+            'doctors' => app(DoctorService::class)->listActive($this->department_id, auth()->user()->branch_id ?? 1),
+            'selectedDoctor' => $this->selectedDoctor,
         ];
     }
 };
@@ -209,8 +261,33 @@ new class extends Component
             <form wire:submit="register">
                 @if($step === 1)
                     <div class="premium-card p-4" wire:transition>
-                        <h4 class="mb-3">Patient Information</h4>
+                        <h4 class="mb-3">Visit & Patient Details</h4>
                         <div class="row g-3">
+                            <div class="col-12 col-md-4">
+                                <label class="form-label required">Department</label>
+                                <select wire:model.live="department_id" class="form-select form-select-lg" required>
+                                    <option value="">Select Department</option>
+                                    @foreach($departments as $d)<option value="{{ $d->id }}">{{ $d->name }}</option>@endforeach
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label required">Doctor</label>
+                                <select wire:model.live="doctor_id" class="form-select form-select-lg" required @disabled(! $department_id)>
+                                    <option value="">Select Doctor</option>
+                                    @foreach($doctors as $doc)
+                                        <option value="{{ $doc->id }}">{{ str_starts_with($doc->user->name, 'Dr.') ? $doc->user->name : 'Dr. '.$doc->user->name }}</option>
+                                    @endforeach
+                                </select>
+                                @if($department_id && $doctors->isEmpty())
+                                    <div class="small text-warning mt-1">No active doctor in this department.</div>
+                                @endif
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">Consultation Fee</label>
+                                <input type="text" class="form-control form-control-lg bg-light" readonly
+                                       value="{{ $selectedDoctor ? '₹'.number_format($selectedDoctor->consultation_fee, 2) : '—' }}">
+                            </div>
+                            <div class="col-12"><hr class="my-1"></div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label required">Full Name</label>
                                 <input type="text" wire:model.blur="name" class="form-control form-control-lg" required>
@@ -228,18 +305,6 @@ new class extends Component
                                 </select>
                             </div>
                             <div class="col-12 col-md-2"><label class="form-label">Age</label><input type="number" wire:model="age" class="form-control"></div>
-                            <div class="col-12 col-md-3"><label class="form-label">Department</label>
-                                <select wire:model="department_id" class="form-select">
-                                    <option value="">Select</option>
-                                    @foreach($departments as $d)<option value="{{ $d->id }}">{{ $d->name }}</option>@endforeach
-                                </select>
-                            </div>
-                            <div class="col-12 col-md-4"><label class="form-label">Doctor</label>
-                                <select wire:model="doctor_id" class="form-select">
-                                    <option value="">Any</option>
-                                    @foreach($doctors as $doc)<option value="{{ $doc->id }}">Dr. {{ $doc->user->name }}</option>@endforeach
-                                </select>
-                            </div>
                         </div>
                         <div class="cc-reg-actions text-end mt-3">
                             <button type="button" wire:click="nextStep" class="btn btn-primary btn-lg">Next: Vitals <i class="ti ti-arrow-right"></i></button>
@@ -268,7 +333,11 @@ new class extends Component
                         <div class="row g-2 small">
                             <div class="col-6"><strong>Name:</strong> {{ $name }}</div>
                             <div class="col-6"><strong>Mobile:</strong> {{ $mobile }}</div>
+                            <div class="col-6"><strong>Doctor:</strong> {{ $selectedDoctor?->user->name ?? '—' }}</div>
+                            <div class="col-6"><strong>Department:</strong> {{ $departments->firstWhere('id', $department_id)?->name ?? '—' }}</div>
+                            <div class="col-6"><strong>Fee:</strong> {{ $selectedDoctor ? '₹'.number_format($selectedDoctor->consultation_fee, 2) : '—' }}</div>
                             <div class="col-6"><strong>Priority:</strong> <span class="badge {{ $priority==='emergency'?'bg-danger':'bg-secondary' }}">{{ ucfirst($priority) }}</span></div>
+                            <div class="col-6"><strong>Token Prefix:</strong> {{ $selectedDoctor?->token_prefix ?? '—' }}</div>
                             <div class="col-12"><strong>Complaint:</strong> {{ $chief_complaint ?: '—' }}</div>
                         </div>
                         <div class="cc-reg-actions d-flex justify-content-between mt-4">
@@ -286,16 +355,18 @@ new class extends Component
 
     @if($showPrintModal && $printVisitId)
         <div class="modal show d-block" tabindex="-1" style="background:rgba(15,23,42,0.55);z-index:1060"
-             x-data="opdPrintModal()" x-init="init(@js(route('print.opd-slip', ['visit' => $printVisitId, 'embed' => 1])))"
+             wire:key="print-modal-{{ $printVisitId }}"
+             x-data="opdPrintModal(@this)"
+             x-init="init(@js(route('print.opd-slip', ['visit' => $printVisitId, 'embed' => 1])))"
              @keydown.escape.window="$wire.closePrintAndReset()">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius:16px;overflow:hidden">
                     <div class="modal-header border-0" style="background:var(--cc-primary-light)">
                         <h5 class="modal-title fw-bold"><i class="ti ti-printer me-2"></i>OPD Token Slip</h5>
-                        <button type="button" class="btn-close" wire:click="closePrintAndReset"></button>
+                        <button type="button" class="btn-close" wire:click="closePrintAndReset" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-0 bg-light">
-                        <iframe id="opdPrintFrame" src="" style="width:100%;height:420px;border:0" title="OPD Slip"></iframe>
+                        <iframe id="opdPrintFrame" src="about:blank" style="width:100%;height:420px;border:0" title="OPD Slip"></iframe>
                     </div>
                     <div class="modal-footer border-0 gap-2">
                         <button type="button" class="btn btn-outline-secondary" wire:click="closePrintAndReset">Done — New Registration</button>
@@ -311,8 +382,9 @@ new class extends Component
 <script>
 $wire.on('notify', (p) => window.showToast?.(p.title, p.message, p.type));
 
-window.opdPrintModal = () => ({
+window.opdPrintModal = (wire) => ({
     printUrl: '',
+    printed: false,
     init(url) {
         this.printUrl = url;
         const frame = document.getElementById('opdPrintFrame');
@@ -321,12 +393,15 @@ window.opdPrintModal = () => ({
         frame.onload = () => {
             setTimeout(() => {
                 try {
-                    frame.contentWindow?.focus();
-                    frame.contentWindow?.print();
+                    const cw = frame.contentWindow;
+                    if (!cw) return;
+                    cw.addEventListener('afterprint', () => { this.printed = true; });
+                    cw.focus();
+                    cw.print();
                 } catch (e) {
                     window.open(url, '_blank', 'width=420,height=640');
                 }
-            }, 500);
+            }, 700);
         };
     },
     printSlip() {
