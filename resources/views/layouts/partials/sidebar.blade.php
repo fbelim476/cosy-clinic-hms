@@ -26,6 +26,9 @@
             <a href="{{ route('admin.settings') }}" data-tooltip="Settings" class="cc-nav-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
                 <i class="ti ti-settings"></i><span class="cc-nav-label">Settings</span>
             </a>
+            <a href="{{ route('admin.print.dashboard') }}" data-tooltip="Print Management" class="cc-nav-link {{ request()->routeIs('admin.print.*') ? 'active' : '' }}">
+                <i class="ti ti-printer"></i><span class="cc-nav-label">Print Management</span>
+            </a>
         @endif
 
         @if(in_array($role, ['receptionist', 'nurse', 'super-admin']))

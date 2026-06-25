@@ -30,6 +30,8 @@ class CosyClinicSeeder extends Seeder
             'lab.view', 'lab.process', 'lab.upload',
             'medicines.manage', 'users.manage', 'doctors.manage', 'settings.manage',
             'reports.view', 'audit.view',
+            'print.view', 'print.create', 'print.edit', 'print.delete',
+            'print.preview', 'print.publish', 'print.settings',
         ];
 
         foreach ($permissions as $p) {

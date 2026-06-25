@@ -9,7 +9,7 @@ use App\Services\NumberGeneratorService;
 use App\Services\PatientService;
 use App\Services\PharmacyService;
 use Illuminate\Support\ServiceProvider;
-// use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {

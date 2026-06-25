@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\MedicineController;
 use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\PrintController as AdminPrintController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => auth()->check() ? redirect(auth()->user()->dashboardRoute()) : redirect()->route('login'));
@@ -40,6 +41,24 @@ Route::middleware('auth')->group(function () {
         Route::post('/medicines/import', [MedicineController::class, 'import'])->name('medicines.import');
         Route::get('/settings', [SettingController::class, 'index'])->name('settings');
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+
+        Route::prefix('print')->name('print.')->group(function () {
+            Route::get('/dashboard', [AdminPrintController::class, 'dashboard'])->name('dashboard');
+            Route::get('/templates', [AdminPrintController::class, 'templates'])->name('templates');
+            Route::get('/templates/{template}/builder', [AdminPrintController::class, 'builder'])->name('builder');
+            Route::get('/paper-sizes', [AdminPrintController::class, 'paperSizes'])->name('paper-sizes');
+            Route::get('/printer-profiles', [AdminPrintController::class, 'printerProfiles'])->name('printer-profiles');
+            Route::get('/branding', [AdminPrintController::class, 'branding'])->name('branding');
+            Route::get('/header', [AdminPrintController::class, 'headerBuilder'])->name('header');
+            Route::get('/footer', [AdminPrintController::class, 'footerBuilder'])->name('footer');
+            Route::get('/fonts', [AdminPrintController::class, 'fonts'])->name('fonts');
+            Route::get('/qr-barcode', [AdminPrintController::class, 'qrBarcode'])->name('qr-barcode');
+            Route::get('/variables', [AdminPrintController::class, 'variables'])->name('variables');
+            Route::get('/preview', [AdminPrintController::class, 'preview'])->name('preview');
+            Route::get('/templates/{template}/versions', [AdminPrintController::class, 'versions'])->name('versions');
+            Route::get('/import-export', [AdminPrintController::class, 'importExport'])->name('import-export');
+            Route::get('/settings', [AdminPrintController::class, 'settings'])->name('settings');
+        });
     });
 
     Route::middleware('role:receptionist,nurse,super-admin')->prefix('reception')->name('reception.')->group(function () {
